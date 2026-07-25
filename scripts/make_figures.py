@@ -36,6 +36,8 @@ RENDERERS = {
     "08_trilogy": lambda a, s, g: F.fig_trilogy(a),
     "09_refrain_over_time": lambda a, s, g: F.fig_refrain_over_time(a),
     "10_vocab_growth": lambda a, s, g: F.fig_vocab_growth(g, a),
+    "11_rhyme_over_time": lambda a, s, g: F.fig_rhyme_over_time(a),
+    "12_structure_over_time": lambda a, s, g: F.fig_structure_over_time(a),
 }
 
 

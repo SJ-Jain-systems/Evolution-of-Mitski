@@ -47,6 +47,7 @@ def test_motif_terrain_is_a_surface(tables):
     ax = _sole_3d_axes(fig)
     # A surface collection is present (7 albums x 6 motifs underneath).
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
     assert any(isinstance(c, Poly3DCollection) for c in ax.collections)
 
 

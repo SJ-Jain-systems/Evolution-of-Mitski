@@ -205,32 +205,125 @@ def lexical_summary(text: str, window: int = 50) -> dict[str, float]:
 # a lens on the lyrics, not a claim of exhaustive coverage.
 MOTIF_LEXICONS: dict[str, set[str]] = {
     "body": {
-        "body", "bodies", "blood", "bone", "bones", "skin", "heart", "hearts",
-        "hand", "hands", "eye", "eyes", "mouth", "lips", "hair", "chest",
-        "knee", "knees", "arms", "arm", "face", "teeth", "veins", "breath",
+        "body",
+        "bodies",
+        "blood",
+        "bone",
+        "bones",
+        "skin",
+        "heart",
+        "hearts",
+        "hand",
+        "hands",
+        "eye",
+        "eyes",
+        "mouth",
+        "lips",
+        "hair",
+        "chest",
+        "knee",
+        "knees",
+        "arms",
+        "arm",
+        "face",
+        "teeth",
+        "veins",
+        "breath",
     },
     "water": {
-        "water", "waters", "sea", "ocean", "wave", "waves", "rain", "river",
-        "lake", "tears", "tear", "drown", "drowning", "swim", "flood", "wet",
-        "creek", "tide", "pool",
+        "water",
+        "waters",
+        "sea",
+        "ocean",
+        "wave",
+        "waves",
+        "rain",
+        "river",
+        "lake",
+        "tears",
+        "tear",
+        "drown",
+        "drowning",
+        "swim",
+        "flood",
+        "wet",
+        "creek",
+        "tide",
+        "pool",
     },
     "fire_light": {
-        "fire", "flame", "flames", "burn", "burning", "burns", "light",
-        "lights", "spark", "sun", "star", "stars", "glow", "lightning",
-        "fireworks", "shine", "bright", "smoke", "ember",
+        "fire",
+        "flame",
+        "flames",
+        "burn",
+        "burning",
+        "burns",
+        "light",
+        "lights",
+        "spark",
+        "sun",
+        "star",
+        "stars",
+        "glow",
+        "lightning",
+        "fireworks",
+        "shine",
+        "bright",
+        "smoke",
+        "ember",
     },
     "home_domestic": {
-        "home", "house", "room", "door", "kitchen", "bed", "wall", "walls",
-        "lamp", "window", "floor", "table", "husband", "wife", "married",
-        "marry", "phone", "car",
+        "home",
+        "house",
+        "room",
+        "door",
+        "kitchen",
+        "bed",
+        "wall",
+        "walls",
+        "lamp",
+        "window",
+        "floor",
+        "table",
+        "husband",
+        "wife",
+        "married",
+        "marry",
+        "phone",
+        "car",
     },
     "death": {
-        "die", "died", "dying", "death", "dead", "grave", "bury", "buried",
-        "ghost", "kill", "gone", "goodbye", "funeral", "coffin", "heaven",
+        "die",
+        "died",
+        "dying",
+        "death",
+        "dead",
+        "grave",
+        "bury",
+        "buried",
+        "ghost",
+        "kill",
+        "gone",
+        "goodbye",
+        "funeral",
+        "coffin",
+        "heaven",
     },
     "animals": {
-        "dog", "dogs", "horse", "cat", "cats", "bird", "birds", "wolf",
-        "coyote", "buffalo", "bug", "angel", "pearl", "cowboy",
+        "dog",
+        "dogs",
+        "horse",
+        "cat",
+        "cats",
+        "bird",
+        "birds",
+        "wolf",
+        "coyote",
+        "buffalo",
+        "bug",
+        "angel",
+        "pearl",
+        "cowboy",
     },
 }
 
@@ -248,20 +341,14 @@ def motif_counts(text: str) -> dict[str, int]:
     """Raw hit count for each motif lexicon in ``text``."""
     tokens = tokenize(text)
     counts = Counter(tokens)
-    return {
-        motif: sum(counts[w] for w in words)
-        for motif, words in MOTIF_LEXICONS.items()
-    }
+    return {motif: sum(counts[w] for w in words) for motif, words in MOTIF_LEXICONS.items()}
 
 
 def pronoun_counts(text: str) -> dict[str, int]:
     """Raw pronoun-group counts in ``text``."""
     tokens = tokenize(text)
     counts = Counter(tokens)
-    return {
-        group: sum(counts[w] for w in words)
-        for group, words in PRONOUNS.items()
-    }
+    return {group: sum(counts[w] for w in words) for group, words in PRONOUNS.items()}
 
 
 # --- Distinctive words (keyness) -------------------------------------------
@@ -282,22 +369,137 @@ def pronoun_counts(text: str) -> dict[str, int]:
 # Choir]" tokenizes to verse/mitski/choir) and sung vocables ("doo", "ra").
 STOPWORDS: set[str] = {
     # function words
-    "a", "an", "and", "as", "at", "be", "been", "but", "by", "do", "for",
-    "from", "had", "has", "have", "he", "her", "him", "his", "i", "i'm",
-    "i'll", "i've", "i'd", "if", "in", "is", "it", "it's", "its", "me", "my",
-    "no", "not", "of", "oh", "on", "or", "our", "out", "she", "so", "than",
-    "that", "that's", "the", "their", "them", "then", "there", "they", "this",
-    "to", "up", "us", "was", "we", "we're", "were", "what", "what'd", "when",
-    "who", "will", "with", "would", "you", "you're", "you'll", "you've",
-    "you'd", "your", "yours", "am", "are", "'cause", "cause", "just", "all",
-    "like", "get", "got", "can", "could", "now", "yeah", "where", "don't",
-    "gonna", "wanna", "gotta", "again", "more", "only", "very", "really",
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "be",
+    "been",
+    "but",
+    "by",
+    "do",
+    "for",
+    "from",
+    "had",
+    "has",
+    "have",
+    "he",
+    "her",
+    "him",
+    "his",
+    "i",
+    "i'm",
+    "i'll",
+    "i've",
+    "i'd",
+    "if",
+    "in",
+    "is",
+    "it",
+    "it's",
+    "its",
+    "me",
+    "my",
+    "no",
+    "not",
+    "of",
+    "oh",
+    "on",
+    "or",
+    "our",
+    "out",
+    "she",
+    "so",
+    "than",
+    "that",
+    "that's",
+    "the",
+    "their",
+    "them",
+    "then",
+    "there",
+    "they",
+    "this",
+    "to",
+    "up",
+    "us",
+    "was",
+    "we",
+    "we're",
+    "were",
+    "what",
+    "what'd",
+    "when",
+    "who",
+    "will",
+    "with",
+    "would",
+    "you",
+    "you're",
+    "you'll",
+    "you've",
+    "you'd",
+    "your",
+    "yours",
+    "am",
+    "are",
+    "'cause",
+    "cause",
+    "just",
+    "all",
+    "like",
+    "get",
+    "got",
+    "can",
+    "could",
+    "now",
+    "yeah",
+    "where",
+    "don't",
+    "gonna",
+    "wanna",
+    "gotta",
+    "again",
+    "more",
+    "only",
+    "very",
+    "really",
     # structural transcription tags (survive cleaning as bare tokens)
-    "verse", "chorus", "prechorus", "pre", "post", "bridge", "intro", "outro",
-    "hook", "refrain", "interlude", "mitski", "choir", "prod", "feat", "ft",
+    "verse",
+    "chorus",
+    "prechorus",
+    "pre",
+    "post",
+    "bridge",
+    "intro",
+    "outro",
+    "hook",
+    "refrain",
+    "interlude",
+    "mitski",
+    "choir",
+    "prod",
+    "feat",
+    "ft",
     # sung vocables
-    "la", "na", "ooh", "ah", "mm", "doo", "ra", "da", "dum", "ba", "hey",
-    "woah", "whoa", "oo", "uh", "ooo", "ahh",
+    "la",
+    "na",
+    "ooh",
+    "ah",
+    "mm",
+    "doo",
+    "ra",
+    "da",
+    "dum",
+    "ba",
+    "hey",
+    "woah",
+    "whoa",
+    "oo",
+    "uh",
+    "ooo",
+    "ahh",
 }
 
 
@@ -360,6 +562,7 @@ def distinctive_words(
 # scoring stays transparent and fully offline, matching the project's use of
 # small, auditable lexicons elsewhere.
 
+
 def load_valence_lexicon(root: Path | None = None) -> dict[str, int]:
     """Load the bundled AFINN valence lexicon (``word<TAB>score`` per line).
 
@@ -410,8 +613,12 @@ def valence_stats(text: str, lexicon: dict[str, int]) -> dict[str, float]:
     tokens = tokenize(text)
     scored = [lexicon[t] for t in tokens if t in lexicon]
     if not scored:
-        return {"valence_mean": 0.0, "valence_std": 0.0,
-                "valence_range": 0.0, "valence_coverage": 0.0}
+        return {
+            "valence_mean": 0.0,
+            "valence_std": 0.0,
+            "valence_range": 0.0,
+            "valence_coverage": 0.0,
+        }
     mean = sum(scored) / len(scored)
     var = sum((s - mean) ** 2 for s in scored) / len(scored)
     return {
@@ -419,4 +626,267 @@ def valence_stats(text: str, lexicon: dict[str, int]) -> dict[str, float]:
         "valence_std": math.sqrt(var),
         "valence_range": float(max(scored) - min(scored)),
         "valence_coverage": len(scored) / len(tokens) if tokens else 0.0,
+    }
+
+
+# --- Rhyme (phonetics) -----------------------------------------------------
+# How densely does an album rhyme, and does the rhyming thin out as the lyrics
+# get sparser? Rhyme is a property of *sound*, not spelling ("love"/"move" look
+# alike but do not rhyme; "eye"/"I" rhyme but share no letters), so this needs
+# pronunciations. We bundle a subset of the CMU Pronouncing Dictionary (ARPABET
+# phonemes, restricted to the corpus vocabulary) under ``data/lexicons/`` in the
+# same flat, offline, auditable form as the AFINN lexicon.
+
+# ARPABET vowel phonemes (without the trailing 0/1/2 stress digit). Every rhyme
+# hangs off a vowel, so these are what ``rime`` searches back from.
+_ARPABET_VOWELS = frozenset(
+    {"AA", "AE", "AH", "AO", "AW", "AY", "EH", "ER", "EY", "IH", "IY", "OW", "OY", "UH", "UW"}
+)
+
+# A line that is only a section tag ("[Chorus]", "[Verse 2]") is not a lyric line
+# and must not contribute a rhyme word.
+_SECTION_TAG_RE = re.compile(r"^\[.*\]$")
+
+
+def _is_vowel(phoneme: str) -> bool:
+    """True if ``phoneme`` is an ARPABET vowel (ignoring its stress digit)."""
+    return phoneme.rstrip("012") in _ARPABET_VOWELS
+
+
+def rime(phonemes: Iterable[str]) -> tuple[str, ...]:
+    """The rhyming tail of a pronunciation: from the last *stressed* vowel to the
+    end (the linguistic "rime"). Two words rhyme iff their rimes are equal.
+
+    Falls back to the last vowel of any stress when no vowel carries primary or
+    secondary stress, and to the whole sequence when there is no vowel at all.
+    Stress digits are kept so that, e.g., stressed and unstressed endings do not
+    collapse together.
+    """
+    phones = list(phonemes)
+    if not phones:
+        return ()
+    stressed = [i for i, p in enumerate(phones) if p.endswith(("1", "2")) and _is_vowel(p)]
+    if stressed:
+        start = stressed[-1]
+    else:
+        vowels = [i for i, p in enumerate(phones) if _is_vowel(p)]
+        start = vowels[-1] if vowels else 0
+    return tuple(phones[start:])
+
+
+def load_pronunciation_lexicon(root: Path | None = None) -> dict[str, tuple[str, ...]]:
+    """Load the bundled CMU pronunciation subset (``word<TAB>PHONEMES`` per line).
+
+    Values are the ARPABET phoneme tuple for the word's primary pronunciation.
+    Comment lines (starting with ``#``) and blanks are skipped. ``root`` is the
+    repo root; when omitted the lexicon is located relative to this file, exactly
+    like :func:`load_valence_lexicon`.
+    """
+    if root is None:
+        # src/mitski_analysis/text.py -> repo root is two parents up.
+        root = Path(__file__).resolve().parents[2]
+    path = Path(root) / "data" / "lexicons" / "pronunciations_cmudict.txt"
+    lexicon: dict[str, tuple[str, ...]] = {}
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if not line or line.startswith("#"):
+                continue
+            word, _, phones = line.partition("\t")
+            word = word.strip()
+            phones = phones.strip()
+            if word and phones:
+                lexicon[normalize(word)] = tuple(phones.split())
+    return lexicon
+
+
+def _line_final_words(text: str) -> list[str]:
+    """Line-final word token of every lyric line, skipping section-tag lines and
+    lines with no word token. Used as the rhyme-bearing positions."""
+    finals = []
+    for line in split_lines(text):
+        if _SECTION_TAG_RE.match(line):
+            continue
+        toks = tokenize(line)
+        if toks:
+            finals.append(toks[-1])
+    return finals
+
+
+def rhyme_summary(
+    text: str, lexicon: dict[str, tuple[str, ...]] | None = None, window: int = 4
+) -> dict[str, float]:
+    """Rhyme metrics over the line-final words of ``text``.
+
+    A line rhymes when another line whose end-word falls within ``window`` lines
+    shares its rime (see :func:`rime`). Returns:
+
+    - ``rhyme_density``: share of *covered* lines (those whose end-word is in the
+      pronunciation lexicon) that rhyme with another nearby line.
+    - ``end_rhyme_pairs_per_line``: count of within-window rhyming line pairs,
+      normalized by the number of lyric lines -- a density that also rewards
+      lines rhyming with several neighbours.
+    - ``rhyme_coverage``: share of lyric lines whose end-word the lexicon knows, a
+      caveat on how much of the rhyme picture is even visible (mirrors
+      ``valence_coverage``).
+
+    All fields are 0.0 when there is nothing to measure.
+    """
+    if lexicon is None:
+        lexicon = load_pronunciation_lexicon()
+    finals = _line_final_words(text)
+    n_lines = len(finals)
+    if n_lines == 0:
+        return {"rhyme_density": 0.0, "end_rhyme_pairs_per_line": 0.0, "rhyme_coverage": 0.0}
+
+    rimes: list[tuple[str, ...] | None] = [
+        rime(lexicon[w]) if w in lexicon else None for w in finals
+    ]
+    covered = [i for i, r in enumerate(rimes) if r]
+    coverage = len(covered) / n_lines
+    if len(covered) < 2:
+        return {
+            "rhyme_density": 0.0,
+            "end_rhyme_pairs_per_line": 0.0,
+            "rhyme_coverage": coverage,
+        }
+
+    rhyming_lines: set[int] = set()
+    pairs = 0
+    for a_pos, i in enumerate(covered):
+        for j in covered[a_pos + 1 :]:
+            if j - i > window:
+                break
+            if rimes[i] == rimes[j]:
+                pairs += 1
+                rhyming_lines.add(i)
+                rhyming_lines.add(j)
+    return {
+        "rhyme_density": len(rhyming_lines) / len(covered),
+        "end_rhyme_pairs_per_line": pairs / n_lines,
+        "rhyme_coverage": coverage,
+    }
+
+
+# --- Song structure (sections) ---------------------------------------------
+# The cleaned lyrics keep the transcription's section markers ("[Verse 1]",
+# "[Chorus]", "[Bridge]") on their own lines. They are noise for the token
+# metrics (and dropped by STOPWORDS there), but they are exactly the signal for
+# reading *structure*: how many sections a song has, how much of it is chorus,
+# and whether it repeats whole blocks. This traces the source video's arc from a
+# different angle -- does the compression that thins the words also change the
+# scaffolding of the songs?
+
+_SECTION_RE = re.compile(r"^\[(.*?)\]\s*$")
+
+# Coarse section types the raw tags map onto. Order matters: the pre-/post-chorus
+# checks must run before the plain "chorus" check so "[Pre-Chorus]" does not read
+# as a chorus. Anything unrecognised is "other".
+_SECTION_ALIASES: tuple[tuple[str, str], ...] = (
+    ("prechorus", "prechorus"),
+    ("pre-chorus", "prechorus"),
+    ("pre chorus", "prechorus"),
+    ("postchorus", "postchorus"),
+    ("post-chorus", "postchorus"),
+    ("post chorus", "postchorus"),
+    ("chorus", "chorus"),
+    ("verse", "verse"),
+    ("bridge", "bridge"),
+    ("intro", "intro"),
+    ("outro", "outro"),
+    ("refrain", "refrain"),
+    ("hook", "hook"),
+    ("interlude", "interlude"),
+    ("instrumental", "instrumental"),
+)
+
+
+def _canonical_section(label: str) -> str:
+    """Map a raw section-tag label ("Verse 1", "Pre-Chorus", "Chorus: Mitski")
+    to a coarse type. Only the part before any ``:`` (which names singers, not the
+    section) is inspected."""
+    head = label.split(":", 1)[0].strip().lower()
+    for needle, canonical in _SECTION_ALIASES:
+        if needle in head:
+            return canonical
+    return "other"
+
+
+def parse_sections(text: str) -> list[tuple[str, list[str]]]:
+    """Split a lyric into ``(section_type, lines)`` blocks on its ``[...]`` tags.
+
+    Non-empty lyric lines are accumulated under the most recent tag; content that
+    appears before the first tag becomes an implicit leading ``other`` section, so
+    no lyric line is ever dropped. A tag with no lines under it (e.g. an
+    ``[Instrumental Break]``) still yields an empty block, which keeps the section
+    *count* faithful to the transcription.
+    """
+    sections: list[tuple[str, list[str]]] = []
+    current_type: str | None = None
+    current_lines: list[str] = []
+
+    def _flush() -> None:
+        if current_type is not None or current_lines:
+            sections.append((current_type or "other", current_lines))
+
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        m = _SECTION_RE.match(line)
+        if m:
+            _flush()
+            current_type = _canonical_section(m.group(1))
+            current_lines = []
+        else:
+            current_lines.append(line)
+    _flush()
+    return sections
+
+
+def section_summary(text: str) -> dict[str, float]:
+    """Structural metrics for one song from its section tags.
+
+    - ``section_count``: number of tagged (or implicit) blocks.
+    - ``distinct_section_types``: how many *kinds* of section appear.
+    - ``chorus_share``: share of lyric lines that sit in a chorus or post-chorus.
+    - ``has_bridge``: 1.0 if the song has a bridge, else 0.0.
+    - ``section_repetition``: share of non-empty blocks whose text repeats an
+      earlier block verbatim -- a whole-section analogue of ``refrain_ratio``.
+
+    All fields are 0.0 for a lyric with no lines.
+    """
+    sections = parse_sections(text)
+    total_lines = sum(len(lines) for _, lines in sections)
+    if total_lines == 0:
+        return {
+            "section_count": 0.0,
+            "distinct_section_types": 0.0,
+            "chorus_share": 0.0,
+            "has_bridge": 0.0,
+            "section_repetition": 0.0,
+        }
+
+    chorus_lines = sum(len(lines) for stype, lines in sections if stype in ("chorus", "postchorus"))
+    types = {stype for stype, _ in sections}
+
+    seen: set[str] = set()
+    repeated_blocks = 0
+    content_blocks = 0
+    for _stype, lines in sections:
+        if not lines:
+            continue
+        content_blocks += 1
+        key = "\n".join(" ".join(tokenize(ln)) for ln in lines)
+        if key in seen:
+            repeated_blocks += 1
+        else:
+            seen.add(key)
+
+    return {
+        "section_count": float(len(sections)),
+        "distinct_section_types": float(len(types)),
+        "chorus_share": chorus_lines / total_lines,
+        "has_bridge": 1.0 if "bridge" in types else 0.0,
+        "section_repetition": repeated_blocks / content_blocks if content_blocks else 0.0,
     }

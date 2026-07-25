@@ -12,6 +12,7 @@ them with `python scripts/build_dataset.py`.
 | `processed/mitski_lyrics_clean.json`  | Cleaned lyric text, same shape, produced by `scripts/clean_lyrics.py`.     |
 | `metadata/albums.json`                | Curated: 7 studio albums with `album_no`, `release_date`, `duration_seconds`, `duration_display`, `duration_source`, and canonical `tracks[]`. |
 | `lexicons/valence_afinn.txt`          | Bundled AFINN valence lexicon (`word<TAB>score`, −5..+5), ODbL.            |
+| `lexicons/pronunciations_cmudict.txt` | CMU Pronouncing Dictionary subset (`word<TAB>ARPABET`), corpus vocabulary only, public domain. Regenerate with `scripts/build_pron_lexicon.py`. |
 
 ## Derived tables
 
@@ -34,6 +35,15 @@ Structure / compression: `line_count`, `lines_per_song`, `mean_line_length`,
 Sentiment (AFINN): `mean_valence`, `valence_std`, `valence_range`,
 `valence_coverage` (share of tokens the lexicon scored).
 
+Rhyme (CMU pronunciations): `rhyme_density` (share of line-ends that rhyme with a
+neighbour), `end_rhyme_pairs_per_line`, `rhyme_coverage` (share of line-final
+words the pronunciation dictionary knows).
+
+Structure (from section tags): `sec_section_count` (mean sections per song),
+`sec_distinct_section_types`, `sec_chorus_share` (share of lines in a chorus),
+`sec_has_bridge` (share of songs with a bridge), `sec_section_repetition`
+(share of whole sections that repeat). Album values are per-song averages.
+
 Pronouns: `pron_{first_singular,second,first_plural}` and their `_share`.
 
 Motifs: `motif_{body,water,fire_light,home_domestic,death,animals}` and their
@@ -52,6 +62,8 @@ can never silently drop a song.
 ## Notes
 
 Word-level sentiment uses the AFINN valence lexicon (Finn Årup Nielsen, 2011),
-released under the Open Database License. Album runtimes were compiled from
-Discogs, Apple Music, and Wikipedia, with the source recorded per album in
-`metadata/albums.json`.
+released under the Open Database License. Rhyme detection uses a subset of the
+CMU Pronouncing Dictionary (Carnegie Mellon University; public domain), trimmed
+to the corpus vocabulary so the bundled file stays small and auditable. Album
+runtimes were compiled from Discogs, Apple Music, and Wikipedia, with the source
+recorded per album in `metadata/albums.json`.

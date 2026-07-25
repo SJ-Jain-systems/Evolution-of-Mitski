@@ -31,8 +31,10 @@ pip install -e .[dev]        # editable install + pytest & ruff
 - **Every number in the report is computed from the committed data files** by the
   code in `src/mitski_analysis/`. Add a metric in `text.py`/`stats.py`, surface
   it in `data.py`, and only then read it in a figure or the report.
-- **Tests and lint must pass** (`make test && make lint`) before a PR; CI runs
-  both plus a headless pipeline build on Python 3.10–3.12.
+- **Tests, lint, and formatting must pass** (`make test && make lint`, and
+  `ruff format --check .`) before a PR; CI runs all three plus a headless
+  pipeline build on Python 3.10–3.12. The whole repo, `scraper/` included, is
+  linted and formatted.
 - Keep the data-viz house style: fixed-order categorical colour by entity, the
   single-hue blue ramp for magnitude, recessive grey chrome, direct labels over
   legends where it reads cleanly, one axis per chart.

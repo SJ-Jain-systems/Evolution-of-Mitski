@@ -30,13 +30,13 @@ def strip_header(title: str, lyrics: str) -> str:
         # Marker missing (unexpected format) - fall back to the raw text.
         rest = lyrics
     else:
-        rest = lyrics[idx + len(marker):]
+        rest = lyrics[idx + len(marker) :]
 
     read_more_idx = rest.find(READ_MORE)
     first_bracket = rest.find("[")
 
     if read_more_idx != -1 and (first_bracket == -1 or read_more_idx < first_bracket):
-        rest = rest[read_more_idx + len(READ_MORE):]
+        rest = rest[read_more_idx + len(READ_MORE) :]
     elif first_bracket > 0:
         rest = rest[first_bracket:]
 
@@ -47,8 +47,7 @@ def normalize_whitespace(text: str) -> str:
     """Collapse scraper whitespace artifacts (nbsp, em-spaces, etc.) without
     touching newlines, then trim each line and the overall text."""
     normalized = "".join(
-        " " if ch != "\n" and unicodedata.category(ch) == "Zs" else ch
-        for ch in text
+        " " if ch != "\n" and unicodedata.category(ch) == "Zs" else ch for ch in text
     )
     normalized = re.sub(r"[ \t]+", " ", normalized)
     lines = [line.strip() for line in normalized.split("\n")]
@@ -85,9 +84,7 @@ def clean_song(song: dict, strip_tags: bool, min_length: int) -> dict:
 
 
 def clean_lyrics_file(data: dict, strip_tags: bool, min_length: int) -> dict:
-    cleaned_songs = [
-        clean_song(song, strip_tags, min_length) for song in data["songs"]
-    ]
+    cleaned_songs = [clean_song(song, strip_tags, min_length) for song in data["songs"]]
     return {
         "artist": data.get("artist"),
         "source_url": data.get("source_url"),

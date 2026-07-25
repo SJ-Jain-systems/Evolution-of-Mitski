@@ -44,10 +44,12 @@ data/
                album_stats.csv, song_stats.csv   # generated analysis tables
   metadata/    albums.json                  # canonical tracklists, dates, durations (curated)
   lexicons/    valence_afinn.txt            # bundled AFINN sentiment lexicon (ODbL)
+               pronunciations_cmudict.txt   # bundled CMU pronunciation subset (public domain)
 src/mitski_analysis/
   text.py      tokenizing + lexical/theme metrics (TTR, MATTR, MTLD, Yule's K,
                line/refrain metrics, motifs, pronouns, distinctive-word keyness,
-               AFINN valence + dispersion)
+               AFINN valence + dispersion, CMU-based end-rhyme density,
+               section-structure metrics from the transcription tags)
   data.py      joins lyrics <-> album metadata into tidy tables (+ vocab-growth)
   stats.py     bootstrap confidence intervals for the report's correlations
   theme.py     matplotlib theme (validated data-viz palette), incl. 3D helpers
@@ -55,10 +57,11 @@ src/mitski_analysis/
   figures3d.py the 3D figures (matplotlib): the evolution trajectory, the motif
                terrain, the per-song cloud, the pronoun trajectory
 scripts/
-  clean_lyrics.py     raw scrape -> cleaned lyrics
-  build_dataset.py    -> data/processed/*.csv
-  make_figures.py     -> figures/*.png
-  make_3d.py          -> figures/3d/*.png + *.gif  (static render + rotation)
+  clean_lyrics.py       raw scrape -> cleaned lyrics
+  build_dataset.py      -> data/processed/*.csv
+  build_pron_lexicon.py -> data/lexicons/pronunciations_cmudict.txt (from a full cmudict)
+  make_figures.py       -> figures/*.png
+  make_3d.py            -> figures/3d/*.png + *.gif  (static render + rotation)
 report/
   mitski_lyrics_over_time.qmd   # the report
 tests/         unit + integration tests
@@ -99,7 +102,9 @@ Discogs / Apple Music / Wikipedia, with provenance recorded per album), and the
 join in `data.py` fails loudly if any canonical track is missing, so album totals
 can never silently drop a song. Word-level sentiment uses the AFINN valence
 lexicon (Finn Årup Nielsen, 2011), bundled under `data/lexicons/` and released
-under the Open Database License. Lyrics are quoted only in short excerpts, for
-commentary and criticism. Analysis covers the seven studio albums for which
+under the Open Database License. End-rhyme detection uses a subset of the CMU
+Pronouncing Dictionary (Carnegie Mellon University; public domain), trimmed to
+the corpus vocabulary and bundled alongside it. Lyrics are quoted only in short
+excerpts, for commentary and criticism. Analysis covers the seven studio albums for which
 lyrics are available; see the report's *Limitations* section for the full
 caveats.

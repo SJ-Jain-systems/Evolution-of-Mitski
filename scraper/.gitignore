@@ -4,3 +4,7 @@ __pycache__/
 venv/
 mitski_lyrics.json
 data/*.json
+
+# Debug HTML dumps written while developing the scraper.
+*_debug.html
+artist_page_debug.html
