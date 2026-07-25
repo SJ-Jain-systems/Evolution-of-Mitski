@@ -35,8 +35,9 @@ RENDERERS = {
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--no-gif", action="store_true",
-                        help="write PNGs only, skip the rotation animations")
+    parser.add_argument(
+        "--no-gif", action="store_true", help="write PNGs only, skip the rotation animations"
+    )
     args = parser.parse_args()
 
     root = repo_root()

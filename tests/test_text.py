@@ -49,26 +49,38 @@ def test_hapax_ratio():
 
 def test_pronoun_counts():
     counts = T.pronoun_counts("I love you and you love us")
-    assert counts["first_singular"] == 1     # "I"
-    assert counts["second"] == 2             # "you" x2
-    assert counts["first_plural"] == 1       # "us"
+    assert counts["first_singular"] == 1  # "I"
+    assert counts["second"] == 2  # "you" x2
+    assert counts["first_plural"] == 1  # "us"
 
 
 def test_motif_counts():
     counts = T.motif_counts("blood and bones and water and water")
-    assert counts["body"] == 2               # blood, bones
-    assert counts["water"] == 2              # water x2
+    assert counts["body"] == 2  # blood, bones
+    assert counts["water"] == 2  # water x2
 
 
 def test_lexical_summary_keys():
     s = T.lexical_summary("a b a b c")
-    assert set(s) >= {"tokens", "types", "ttr", "mattr", "guiraud_r", "mtld",
-                      "yules_k", "hapax_ratio", "mean_word_length",
-                      "line_count", "mean_line_length", "refrain_ratio"}
+    assert set(s) >= {
+        "tokens",
+        "types",
+        "ttr",
+        "mattr",
+        "guiraud_r",
+        "mtld",
+        "yules_k",
+        "hapax_ratio",
+        "mean_word_length",
+        "line_count",
+        "mean_line_length",
+        "refrain_ratio",
+    }
     assert s["tokens"] == 5 and s["types"] == 3
 
 
 # --- new diversity / structure / valence metrics ---------------------------
+
 
 def test_yules_k_zero_for_all_unique():
     # No word repeats -> concentration K is 0.
@@ -79,8 +91,9 @@ def test_yules_k_zero_for_all_unique():
 
 
 def test_mtld_higher_for_more_varied_text():
-    varied = ("the quick brown fox jumps over the lazy dog and runs far "
-              "beyond every green hill").split()
+    varied = (
+        "the quick brown fox jumps over the lazy dog and runs far beyond every green hill"
+    ).split()
     repetitive = ["yeah", "yeah", "no", "no"] * 6
     assert T.mtld(varied) > T.mtld(repetitive)
     assert T.mtld([]) == 0.0
@@ -108,18 +121,23 @@ def test_line_summary_empty_is_safe():
 def test_valence_stats_spread_and_range():
     lex = {"love": 3, "hate": -3, "ok": 1}
     s = T.valence_stats("love hate ok unscored", lex)
-    assert s["valence_range"] == 6.0            # +3 to -3
+    assert s["valence_range"] == 6.0  # +3 to -3
     assert s["valence_std"] > 0
-    assert 0 < s["valence_coverage"] < 1        # "unscored" is not in the lexicon
+    assert 0 < s["valence_coverage"] < 1  # "unscored" is not in the lexicon
 
 
 def test_valence_stats_empty_is_zeroed():
     s = T.valence_stats("nothing scored here", {"love": 3})
-    assert s == {"valence_mean": 0.0, "valence_std": 0.0,
-                 "valence_range": 0.0, "valence_coverage": 0.0}
+    assert s == {
+        "valence_mean": 0.0,
+        "valence_std": 0.0,
+        "valence_range": 0.0,
+        "valence_coverage": 0.0,
+    }
 
 
 # --- distinctive words -----------------------------------------------------
+
 
 def test_distinctive_words_favours_target_only_terms():
     # "moon" appears only in the target; "night" is shared evenly. The target-
@@ -138,11 +156,10 @@ def test_distinctive_words_favours_target_only_terms():
 def test_distinctive_words_respects_stopwords_and_min_count():
     target = Counter({"moon": 5, "the": 100, "rare": 1})
     background = Counter({"other": 50})
-    ranked = T.distinctive_words(target, background, n=10,
-                                 stopwords={"the"}, min_count=2)
+    ranked = T.distinctive_words(target, background, n=10, stopwords={"the"}, min_count=2)
     words = [w for w, _ in ranked]
-    assert "the" not in words       # stopword dropped
-    assert "rare" not in words      # below min_count
+    assert "the" not in words  # stopword dropped
+    assert "rare" not in words  # below min_count
     assert "moon" in words
 
 
@@ -152,6 +169,7 @@ def test_distinctive_words_empty_inputs_are_safe():
 
 
 # --- valence ---------------------------------------------------------------
+
 
 def test_mean_valence_sign():
     lex = {"love": 3, "good": 3, "hate": -3, "die": -3}
@@ -173,8 +191,112 @@ def test_valence_lexicon_loads_and_scores_corpus_words():
     assert lex["love"] > 0 and lex["hate"] < 0
 
 
+# --- rhyme (phonetics) -----------------------------------------------------
+
+
+def test_rime_takes_last_stressed_vowel_to_end():
+    # "light" = L AY1 T -> rime starts at the stressed AY1.
+    assert T.rime(["L", "AY1", "T"]) == ("AY1", "T")
+    # "eye" = AY1 and "sky" = S K AY1 share the rime AY1, so they rhyme.
+    assert T.rime(["AY1"]) == T.rime(["S", "K", "AY1"]) == ("AY1",)
+    # Different rime -> no rhyme (light vs eye).
+    assert T.rime(["L", "AY1", "T"]) != T.rime(["AY1"])
+
+
+def test_rime_fallbacks():
+    assert T.rime([]) == ()
+    # No stressed vowel: fall back to the last vowel of any stress.
+    assert T.rime(["B", "AH0", "T"]) == ("AH0", "T")
+    # No vowel at all: return the whole sequence.
+    assert T.rime(["S", "T"]) == ("S", "T")
+
+
+def test_rhyme_summary_detects_end_rhymes():
+    lex = {
+        "sky": ("S", "K", "AY1"),
+        "eye": ("AY1",),
+        "cry": ("K", "R", "AY1"),
+        "here": ("HH", "IH1", "R"),
+    }
+    # Three of four line-ends rhyme (sky/eye/cry on AY1); "here" does not.
+    text = "up in the sky\ni caught your eye\ni did not cry\nbut i am here"
+    s = T.rhyme_summary(text, lex, window=4)
+    assert abs(s["rhyme_coverage"] - 1.0) < 1e-9  # all four end-words are known
+    assert abs(s["rhyme_density"] - 3 / 4) < 1e-9
+    assert s["end_rhyme_pairs_per_line"] > 0
+
+
+def test_rhyme_summary_skips_section_tags_and_is_safe_when_empty():
+    lex = {"eye": ("AY1",), "sky": ("S", "K", "AY1")}
+    # The [Chorus] tag line must not count as a rhyme-bearing line.
+    s = T.rhyme_summary("[Chorus]\nin your eye\nin the sky", lex, window=4)
+    assert abs(s["rhyme_coverage"] - 1.0) < 1e-9
+    assert abs(s["rhyme_density"] - 1.0) < 1e-9
+    empty = T.rhyme_summary("", lex)
+    assert empty == {"rhyme_density": 0.0, "end_rhyme_pairs_per_line": 0.0, "rhyme_coverage": 0.0}
+
+
+def test_pronunciation_lexicon_loads_corpus_words():
+    lex = T.load_pronunciation_lexicon()
+    assert len(lex) > 1000
+    # A word certain to be in the corpus and in cmudict, with a plausible rime.
+    assert lex["eye"] == ("AY1",)
+    assert T.rime(lex["eye"]) == ("AY1",)
+
+
+# --- song structure (sections) ---------------------------------------------
+
+
+def test_canonical_section_maps_tags():
+    assert T._canonical_section("Verse 1") == "verse"
+    assert T._canonical_section("Chorus") == "chorus"
+    # Pre-/post-chorus must not collapse into "chorus".
+    assert T._canonical_section("Pre-Chorus") == "prechorus"
+    assert T._canonical_section("Post-Chorus") == "postchorus"
+    # The singer after a colon is ignored.
+    assert T._canonical_section("Bridge: Mitski") == "bridge"
+    assert T._canonical_section("Spoken Word") == "other"
+
+
+def test_parse_sections_splits_on_tags_and_keeps_lead():
+    text = "a lead line\n[Verse 1]\nfirst\nsecond\n[Chorus]\nhook line"
+    sections = T.parse_sections(text)
+    # Implicit leading block, then verse, then chorus.
+    assert [t for t, _ in sections] == ["other", "verse", "chorus"]
+    assert sections[1][1] == ["first", "second"]
+
+
+def test_section_summary_counts_and_shares():
+    text = "[Verse 1]\nline one\nline two\n[Chorus]\nhook\nhook again\n[Bridge]\nturn"
+    s = T.section_summary(text)
+    assert s["section_count"] == 3.0
+    assert s["has_bridge"] == 1.0
+    assert s["distinct_section_types"] == 3.0
+    # 2 of the 5 lyric lines are in the chorus.
+    assert abs(s["chorus_share"] - 2 / 5) < 1e-9
+
+
+def test_section_summary_detects_repeated_blocks():
+    # The same chorus block appears twice -> half the two content blocks repeat.
+    text = "[Chorus]\nhold on\nlet go\n[Chorus]\nhold on\nlet go"
+    s = T.section_summary(text)
+    assert abs(s["section_repetition"] - 0.5) < 1e-9
+
+
+def test_section_summary_empty_is_zeroed():
+    s = T.section_summary("   \n  ")
+    assert s == {
+        "section_count": 0.0,
+        "distinct_section_types": 0.0,
+        "chorus_share": 0.0,
+        "has_bridge": 0.0,
+        "section_repetition": 0.0,
+    }
+
+
 if __name__ == "__main__":
     import traceback
+
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
     for fn in fns:

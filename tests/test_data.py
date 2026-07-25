@@ -54,6 +54,44 @@ def test_mean_valence_column_present_and_bounded():
     assert (albums["mean_valence"].abs() < 5).all()
 
 
+def test_rhyme_columns_present_and_bounded():
+    albums = build_album_table()
+    for col in ("rhyme_density", "rhyme_coverage", "end_rhyme_pairs_per_line"):
+        assert col in albums.columns
+    # Densities and coverage are shares in [0, 1].
+    assert (albums["rhyme_density"].between(0, 1)).all()
+    assert (albums["rhyme_coverage"].between(0, 1)).all()
+    # The bundled pronunciation subset should know almost every line-end word.
+    assert (albums["rhyme_coverage"] > 0.8).all()
+
+
+def test_song_table_has_rhyme_columns():
+    songs = build_song_table()
+    for col in ("rhyme_density", "rhyme_coverage", "end_rhyme_pairs_per_line"):
+        assert col in songs.columns
+
+
+def test_section_columns_present_and_sane():
+    albums = build_album_table()
+    for col in (
+        "sec_section_count",
+        "sec_chorus_share",
+        "sec_has_bridge",
+        "sec_section_repetition",
+    ):
+        assert col in albums.columns
+    # Shares are in [0, 1]; every album has at least one section per song.
+    assert (albums["sec_chorus_share"].between(0, 1)).all()
+    assert (albums["sec_has_bridge"].between(0, 1)).all()
+    assert (albums["sec_section_count"] >= 1).all()
+
+
+def test_song_table_has_section_columns():
+    songs = build_song_table()
+    for col in ("sec_section_count", "sec_chorus_share", "sec_has_bridge"):
+        assert col in songs.columns
+
+
 def test_distinctive_table_one_row_per_album_with_words():
     d = build_distinctive_table(n=6)
     assert len(d) == 7
@@ -64,6 +102,7 @@ def test_distinctive_table_one_row_per_album_with_words():
 
 if __name__ == "__main__":
     import traceback
+
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
     for fn in fns:

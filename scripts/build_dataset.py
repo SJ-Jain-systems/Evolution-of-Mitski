@@ -27,11 +27,18 @@ def main() -> None:
     albums.to_csv(out / "album_stats.csv", index=False)
     songs.to_csv(out / "song_stats.csv", index=False)
 
-    print(f"Wrote {out/'album_stats.csv'}  ({len(albums)} albums)")
-    print(f"Wrote {out/'song_stats.csv'}  ({len(songs)} canonical tracks)")
+    print(f"Wrote {out / 'album_stats.csv'}  ({len(albums)} albums)")
+    print(f"Wrote {out / 'song_stats.csv'}  ({len(songs)} canonical tracks)")
     print()
-    cols = ["album", "release_year", "total_words", "duration_minutes",
-            "words_per_minute", "mattr", "repetition_index"]
+    cols = [
+        "album",
+        "release_year",
+        "total_words",
+        "duration_minutes",
+        "words_per_minute",
+        "mattr",
+        "repetition_index",
+    ]
     print(albums[cols].round(2).to_string(index=False))
 
 

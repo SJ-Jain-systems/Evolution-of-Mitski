@@ -52,20 +52,27 @@ def fig_wpm_over_time(albums: pd.DataFrame):
     ax.plot(xs_dates, ys, color=TH.MUTED, lw=1.4, ls=(0, (4, 3)), zorder=1)
 
     ax.plot(x, y, color=TH.BLUE, lw=2.2, zorder=2)
-    ax.scatter(x, y, s=70, color=TH.BLUE, zorder=3,
-               edgecolor=TH.SURFACE, linewidth=1.5)
+    ax.scatter(x, y, s=70, color=TH.BLUE, zorder=3, edgecolor=TH.SURFACE, linewidth=1.5)
 
     for _, row in albums.iterrows():
         ax.annotate(
             SHORT[row["album"]],
             (row["release_date"], row["words_per_minute"]),
-            textcoords="offset points", xytext=(0, 12 if row["words_per_minute"] >= 55 else -26),
-            ha="center", va="bottom", fontsize=8.5, color=TH.INK_2, linespacing=0.95,
+            textcoords="offset points",
+            xytext=(0, 12 if row["words_per_minute"] >= 55 else -26),
+            ha="center",
+            va="bottom",
+            fontsize=8.5,
+            color=TH.INK_2,
+            linespacing=0.95,
         )
         ax.annotate(
             f"{row['words_per_minute']:.0f}",
             (row["release_date"], row["words_per_minute"]),
-            textcoords="offset points", xytext=(0, 0), ha="center", va="center",
+            textcoords="offset points",
+            xytext=(0, 0),
+            ha="center",
+            va="center",
             fontsize=0,  # value carried by the y-axis; keep marks clean
         )
 
@@ -74,8 +81,12 @@ def fig_wpm_over_time(albums: pd.DataFrame):
     ax.set_ylim(40, 75)
     ax.annotate(
         f"Trend across career:  r = {r:.2f}",
-        xy=(0.98, 0.94), xycoords="axes fraction", ha="right", va="top",
-        fontsize=9.5, color=TH.MUTED,
+        xy=(0.98, 0.94),
+        xycoords="axes fraction",
+        ha="right",
+        va="top",
+        fontsize=9.5,
+        color=TH.MUTED,
     )
     return fig
 
@@ -92,31 +103,54 @@ def fig_wpm_vs_diversity_panels(albums: pd.DataFrame):
     x = albums["release_date"]
 
     ax1.plot(x, albums["words_per_minute"], color=TH.BLUE, lw=2.2)
-    ax1.scatter(x, albums["words_per_minute"], s=55, color=TH.BLUE,
-                edgecolor=TH.SURFACE, linewidth=1.4, zorder=3)
+    ax1.scatter(
+        x,
+        albums["words_per_minute"],
+        s=55,
+        color=TH.BLUE,
+        edgecolor=TH.SURFACE,
+        linewidth=1.4,
+        zorder=3,
+    )
     ax1.set_ylabel("Words per minute")
     ax1.set_title("As the words thin out, each word does more work")
-    ax1.annotate("fewer words per minute →", xy=(0.02, 0.10), xycoords="axes fraction",
-                 fontsize=9, color=TH.MUTED)
+    ax1.annotate(
+        "fewer words per minute →",
+        xy=(0.02, 0.10),
+        xycoords="axes fraction",
+        fontsize=9,
+        color=TH.MUTED,
+    )
 
     # Diversity: the video's own metric is total/unique (repetition); we plot
     # its inverse-reading companion, MATTR, so "up" means "more varied".
     ax2.plot(x, albums["mattr"], color=TH.ORANGE, lw=2.2)
-    ax2.scatter(x, albums["mattr"], s=55, color=TH.ORANGE,
-                edgecolor=TH.SURFACE, linewidth=1.4, zorder=3)
+    ax2.scatter(
+        x, albums["mattr"], s=55, color=TH.ORANGE, edgecolor=TH.SURFACE, linewidth=1.4, zorder=3
+    )
     ax2.set_ylabel("Lexical diversity\n(MATTR, length-robust)")
     ax2.set_xlabel("Album release")
-    ax2.annotate("more varied vocabulary →", xy=(0.02, 0.88), xycoords="axes fraction",
-                 fontsize=9, color=TH.MUTED)
+    ax2.annotate(
+        "more varied vocabulary →",
+        xy=(0.02, 0.88),
+        xycoords="axes fraction",
+        fontsize=9,
+        color=TH.MUTED,
+    )
 
     # Mark the two extremes the story turns on, without labelling every point
     # (album identities are established in the words-per-minute chart above).
     extremes = albums.sort_values("mattr")
     for _, row in pd.concat([extremes.head(1), extremes.tail(1)]).iterrows():
-        ax2.annotate(SHORT_INLINE[row["album"]],
-                     (row["release_date"], row["mattr"]),
-                     textcoords="offset points", xytext=(0, 10),
-                     ha="center", fontsize=8.2, color=TH.INK_2)
+        ax2.annotate(
+            SHORT_INLINE[row["album"]],
+            (row["release_date"], row["mattr"]),
+            textcoords="offset points",
+            xytext=(0, 10),
+            ha="center",
+            fontsize=8.2,
+            color=TH.INK_2,
+        )
     fig.tight_layout()
     return fig
 
@@ -131,25 +165,52 @@ def fig_inverse_scatter(albums: pd.DataFrame):
 
     # Colour early vs mature era by entity role (two categorical slots).
     mature = albums["album_no"] >= 4
-    ax.scatter(x[~mature], y[~mature], s=90, color=TH.CATEGORICAL[4],
-               edgecolor=TH.SURFACE, linewidth=1.5, zorder=3, label="Early era (2012–14)")
-    ax.scatter(x[mature], y[mature], s=90, color=TH.BLUE,
-               edgecolor=TH.SURFACE, linewidth=1.5, zorder=3, label="Mature era (2016–23)")
+    ax.scatter(
+        x[~mature],
+        y[~mature],
+        s=90,
+        color=TH.CATEGORICAL[4],
+        edgecolor=TH.SURFACE,
+        linewidth=1.5,
+        zorder=3,
+        label="Early era (2012–14)",
+    )
+    ax.scatter(
+        x[mature],
+        y[mature],
+        s=90,
+        color=TH.BLUE,
+        edgecolor=TH.SURFACE,
+        linewidth=1.5,
+        zorder=3,
+        label="Mature era (2016–23)",
+    )
 
     xs, ys, r = _fit_line(x[mature], y[mature])
     ax.plot(xs, ys, color=TH.BLUE, lw=1.4, ls=(0, (4, 3)), zorder=1)
 
     for _, row in albums.iterrows():
-        ax.annotate(SHORT_INLINE[row["album"]],
-                    (row["words_per_minute"], row["repetition_index"]),
-                    textcoords="offset points", xytext=(8, 4), fontsize=8.4, color=TH.INK_2)
+        ax.annotate(
+            SHORT_INLINE[row["album"]],
+            (row["words_per_minute"], row["repetition_index"]),
+            textcoords="offset points",
+            xytext=(8, 4),
+            fontsize=8.4,
+            color=TH.INK_2,
+        )
 
     ax.set_xlabel("Words per minute  →  (denser)")
     ax.set_ylabel("Repetition index  (total ÷ unique words)  →  (more repetitive)")
     ax.set_title("Denser albums repeat themselves; sparse albums reach wider")
     ax.legend(loc="upper left")
-    ax.annotate(f"Mature-era fit:  r = {r:.2f}", xy=(0.98, 0.06), xycoords="axes fraction",
-                ha="right", fontsize=9.5, color=TH.MUTED)
+    ax.annotate(
+        f"Mature-era fit:  r = {r:.2f}",
+        xy=(0.98, 0.06),
+        xycoords="axes fraction",
+        ha="right",
+        fontsize=9.5,
+        color=TH.MUTED,
+    )
     return fig
 
 
@@ -163,11 +224,17 @@ def fig_words_per_song(songs: pd.DataFrame, albums: pd.DataFrame):
     for i, album in enumerate(order):
         vals = songs.loc[songs["album"] == album, "word_count"].values
         jitter = rng.uniform(-0.16, 0.16, size=len(vals))
-        ax.scatter(np.full(len(vals), i) + jitter, vals, s=34,
-                   color=TH.SEQUENTIAL[3], edgecolor=TH.SURFACE, linewidth=0.8,
-                   alpha=0.85, zorder=3)
-        ax.plot([i - 0.28, i + 0.28], [vals.mean(), vals.mean()],
-                color=TH.INK, lw=2.2, zorder=4)
+        ax.scatter(
+            np.full(len(vals), i) + jitter,
+            vals,
+            s=34,
+            color=TH.SEQUENTIAL[3],
+            edgecolor=TH.SURFACE,
+            linewidth=0.8,
+            alpha=0.85,
+            zorder=3,
+        )
+        ax.plot([i - 0.28, i + 0.28], [vals.mean(), vals.mean()], color=TH.INK, lw=2.2, zorder=4)
     ax.set_xticks(range(len(order)))
     ax.set_xticklabels([SHORT[a] for a in order], fontsize=8.2, linespacing=0.95)
     ax.set_ylabel("Words per song")
@@ -190,8 +257,16 @@ def fig_pronoun_mix(albums: pd.DataFrame):
     labels = ["I / me / my", "you / your", "we / us / our"]
     bottom = np.zeros(len(order))
     for share, c, lab in zip([i_share, you, we], colors, labels):
-        ax.bar(idx, share, bottom=bottom, width=0.66, color=c, label=lab,
-               edgecolor=TH.SURFACE, linewidth=1.5)
+        ax.bar(
+            idx,
+            share,
+            bottom=bottom,
+            width=0.66,
+            color=c,
+            label=lab,
+            edgecolor=TH.SURFACE,
+            linewidth=1.5,
+        )
         bottom = bottom + share
     ax.set_xticks(idx)
     ax.set_xticklabels([SHORT[a] for a in order["album"]], fontsize=8.2, linespacing=0.95)
@@ -228,8 +303,15 @@ def fig_motif_heatmap(albums: pd.DataFrame):
     vmax = M.max()
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
-            ax.text(j, i, f"{M[i, j]:.1f}", ha="center", va="center", fontsize=8.5,
-                    color=TH.INK if M[i, j] < 0.6 * vmax else TH.SURFACE)
+            ax.text(
+                j,
+                i,
+                f"{M[i, j]:.1f}",
+                ha="center",
+                va="center",
+                fontsize=8.5,
+                color=TH.INK if M[i, j] < 0.6 * vmax else TH.SURFACE,
+            )
     ax.set_title("Recurring imagery, rate per 1,000 words")
     cbar = fig.colorbar(im, ax=ax, fraction=0.045, pad=0.03)
     cbar.outline.set_visible(False)
@@ -255,10 +337,10 @@ def fig_valence_over_time(albums: pd.DataFrame):
     # Colour each point by sign: warm for negative, cool for positive. Two
     # categorical slots, assigned by meaning, not cycled.
     pos = y >= 0
-    ax.scatter(x[pos], y[pos], s=80, color=TH.BLUE, edgecolor=TH.SURFACE,
-               linewidth=1.5, zorder=3)
-    ax.scatter(x[~pos], y[~pos], s=80, color=TH.ORANGE, edgecolor=TH.SURFACE,
-               linewidth=1.5, zorder=3)
+    ax.scatter(x[pos], y[pos], s=80, color=TH.BLUE, edgecolor=TH.SURFACE, linewidth=1.5, zorder=3)
+    ax.scatter(
+        x[~pos], y[~pos], s=80, color=TH.ORANGE, edgecolor=TH.SURFACE, linewidth=1.5, zorder=3
+    )
 
     # Label above each point, except the two near the ceiling (which would
     # collide with the title), so no label crowds the x-axis.
@@ -268,18 +350,31 @@ def fig_valence_over_time(albums: pd.DataFrame):
         ax.annotate(
             SHORT_INLINE[row["album"]],
             (row["release_date"], row["mean_valence"]),
-            textcoords="offset points", xytext=(0, -16 if near_top else 10),
-            ha="center", va="top" if near_top else "bottom",
-            fontsize=8.2, color=TH.INK_2,
+            textcoords="offset points",
+            xytext=(0, -16 if near_top else 10),
+            ha="center",
+            va="top" if near_top else "bottom",
+            fontsize=8.2,
+            color=TH.INK_2,
         )
 
     ax.set_ylabel("Mean word valence  (AFINN, negative ↔ positive)")
     ax.set_xlabel("Album release")
     ax.set_title("Average word sentiment barely tracks the mood of the records")
-    ax.annotate("more positive words →", xy=(0.02, 0.93), xycoords="axes fraction",
-                fontsize=9, color=TH.MUTED)
-    ax.annotate("more negative words →", xy=(0.02, 0.06), xycoords="axes fraction",
-                fontsize=9, color=TH.MUTED)
+    ax.annotate(
+        "more positive words →",
+        xy=(0.02, 0.93),
+        xycoords="axes fraction",
+        fontsize=9,
+        color=TH.MUTED,
+    )
+    ax.annotate(
+        "more negative words →",
+        xy=(0.02, 0.06),
+        xycoords="axes fraction",
+        fontsize=9,
+        color=TH.MUTED,
+    )
     return fig
 
 
@@ -294,26 +389,62 @@ def fig_trilogy(albums: pd.DataFrame):
     ax.axis("off")
 
     panels = [
-        ("Be the Cowboy", TH.TRILOGY["Be the Cowboy"],
-         "explosion of red\nstepping into a persona"),
-        ("Laurel Hell", TH.TRILOGY["Laurel Hell"],
-         "the same frame, in black\nthe persona meets fame"),
-        ("The Land Is\nInhospitable…", TH.TRILOGY["The Land Is Inhospitable and So Are We"],
-         "the camera pulls back\n“what world made this?”"),
+        ("Be the Cowboy", TH.TRILOGY["Be the Cowboy"], "explosion of red\nstepping into a persona"),
+        (
+            "Laurel Hell",
+            TH.TRILOGY["Laurel Hell"],
+            "the same frame, in black\nthe persona meets fame",
+        ),
+        (
+            "The Land Is\nInhospitable…",
+            TH.TRILOGY["The Land Is Inhospitable and So Are We"],
+            "the camera pulls back\n“what world made this?”",
+        ),
     ]
     for i, (name, color, note) in enumerate(panels):
         ax.add_patch(plt.Rectangle((i + 0.08, 0.35), 0.84, 0.78, color=color, ec="none"))
         txt_color = "#ffffff" if name != "The Land Is\nInhospitable…" else TH.INK
-        ax.text(i + 0.5, 0.74, name, ha="center", va="center", color=txt_color,
-                fontsize=10, fontweight="bold", linespacing=0.95)
-        ax.text(i + 0.5, 0.20, note, ha="center", va="center", color=TH.INK_2,
-                fontsize=8.4, linespacing=1.05)
+        ax.text(
+            i + 0.5,
+            0.74,
+            name,
+            ha="center",
+            va="center",
+            color=txt_color,
+            fontsize=10,
+            fontweight="bold",
+            linespacing=0.95,
+        )
+        ax.text(
+            i + 0.5,
+            0.20,
+            note,
+            ha="center",
+            va="center",
+            color=TH.INK_2,
+            fontsize=8.4,
+            linespacing=1.05,
+        )
         if i < 2:
-            arr = FancyArrowPatch((i + 0.93, 0.74), (i + 1.07, 0.74),
-                                  arrowstyle="-|>", mutation_scale=14, color=TH.MUTED, lw=1.6)
+            arr = FancyArrowPatch(
+                (i + 0.93, 0.74),
+                (i + 1.07, 0.74),
+                arrowstyle="-|>",
+                mutation_scale=14,
+                color=TH.MUTED,
+                lw=1.6,
+            )
             ax.add_patch(arr)
-    ax.text(1.5, 1.16, "One image, three times. Each album pulls the camera back",
-            ha="center", va="center", fontsize=11, fontweight="bold", color=TH.INK)
+    ax.text(
+        1.5,
+        1.16,
+        "One image, three times. Each album pulls the camera back",
+        ha="center",
+        va="center",
+        fontsize=11,
+        fontweight="bold",
+        color=TH.INK,
+    )
     fig.tight_layout()
     return fig
 
@@ -333,22 +464,168 @@ def fig_refrain_over_time(albums: pd.DataFrame):
     ax.plot(xs, ys, color=TH.MUTED, lw=1.4, ls=(0, (4, 3)), zorder=1)
 
     mature = albums["album_no"] >= 4
-    ax.scatter(x[~mature], y[~mature], s=90, color=TH.CATEGORICAL[4],
-               edgecolor=TH.SURFACE, linewidth=1.5, zorder=3, label="Early era (2012–14)")
-    ax.scatter(x[mature], y[mature], s=90, color=TH.BLUE,
-               edgecolor=TH.SURFACE, linewidth=1.5, zorder=3, label="Mature era (2016–23)")
+    ax.scatter(
+        x[~mature],
+        y[~mature],
+        s=90,
+        color=TH.CATEGORICAL[4],
+        edgecolor=TH.SURFACE,
+        linewidth=1.5,
+        zorder=3,
+        label="Early era (2012–14)",
+    )
+    ax.scatter(
+        x[mature],
+        y[mature],
+        s=90,
+        color=TH.BLUE,
+        edgecolor=TH.SURFACE,
+        linewidth=1.5,
+        zorder=3,
+        label="Mature era (2016–23)",
+    )
     for _, row in albums.iterrows():
-        ax.annotate(SHORT_INLINE[row["album"]],
-                    (row["repetition_index"], row["refrain_ratio"] * 100),
-                    textcoords="offset points", xytext=(8, 3), fontsize=8.2,
-                    color=TH.INK_2)
+        ax.annotate(
+            SHORT_INLINE[row["album"]],
+            (row["repetition_index"], row["refrain_ratio"] * 100),
+            textcoords="offset points",
+            xytext=(8, 3),
+            fontsize=8.2,
+            color=TH.INK_2,
+        )
 
     ax.set_xlabel("Repetition index  (total ÷ unique words)  →  more repetitive")
     ax.set_ylabel("Repeated-line share  (% of lines that echo an earlier line)")
     ax.set_title("Repeated lines track word repetition, not the calendar")
     ax.legend(loc="lower right")
-    ax.annotate(f"r = {r:.2f}", xy=(0.02, 0.94), xycoords="axes fraction",
-                ha="left", va="top", fontsize=9.5, color=TH.MUTED)
+    ax.annotate(
+        f"r = {r:.2f}",
+        xy=(0.02, 0.94),
+        xycoords="axes fraction",
+        ha="left",
+        va="top",
+        fontsize=9.5,
+        color=TH.MUTED,
+    )
+    return fig
+
+
+# --------------------------------------------------------------------------- #
+# 11. End-rhyme density vs. word density: rhyme is a property of sound, and it
+#     tracks how many words there are to rhyme (words per minute), not the
+#     calendar -- the sparse late records rhyme less because there is less to
+#     rhyme, the same shape as the refrain and repetition stories.
+# --------------------------------------------------------------------------- #
+def fig_rhyme_over_time(albums: pd.DataFrame):
+    fig, ax = TH.new_fig(9.0, 5.4)
+    x = albums["words_per_minute"]
+    y = albums["rhyme_density"] * 100
+
+    xs, ys, r = _fit_line(x, y)
+    ax.plot(xs, ys, color=TH.MUTED, lw=1.4, ls=(0, (4, 3)), zorder=1)
+
+    mature = albums["album_no"] >= 4
+    ax.scatter(
+        x[~mature],
+        y[~mature],
+        s=90,
+        color=TH.CATEGORICAL[4],
+        edgecolor=TH.SURFACE,
+        linewidth=1.5,
+        zorder=3,
+        label="Early era (2012–14)",
+    )
+    ax.scatter(
+        x[mature],
+        y[mature],
+        s=90,
+        color=TH.BLUE,
+        edgecolor=TH.SURFACE,
+        linewidth=1.5,
+        zorder=3,
+        label="Mature era (2016–23)",
+    )
+    for _, row in albums.iterrows():
+        ax.annotate(
+            SHORT_INLINE[row["album"]],
+            (row["words_per_minute"], row["rhyme_density"] * 100),
+            textcoords="offset points",
+            xytext=(8, 3),
+            fontsize=8.2,
+            color=TH.INK_2,
+        )
+
+    ax.set_xlabel("Words per minute  →  (denser)")
+    ax.set_ylabel("End-rhyme density  (% of line-ends that rhyme with a neighbour)")
+    ax.set_title("Rhyme tracks how much there is to rhyme, not the calendar")
+    ax.legend(loc="lower right")
+    ax.annotate(
+        f"r = {r:.2f}",
+        xy=(0.02, 0.94),
+        xycoords="axes fraction",
+        ha="left",
+        va="top",
+        fontsize=9.5,
+        color=TH.MUTED,
+    )
+    return fig
+
+
+# --------------------------------------------------------------------------- #
+# 12. Song structure over time: mean sections per song and chorus share. Unlike
+#     the words, the scaffolding barely moves -- the compression happens *within*
+#     sections (shorter lines and songs), not by dropping the verse/chorus frame.
+# --------------------------------------------------------------------------- #
+def fig_structure_over_time(albums: pd.DataFrame):
+    TH.apply()
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9.0, 6.6), sharex=True)
+    for ax in (ax1, ax2):
+        TH.style_axes(ax)
+
+    order = albums.sort_values("release_date")
+    x = order["release_date"]
+
+    ax1.plot(x, order["sec_section_count"], color=TH.BLUE, lw=2.2)
+    ax1.scatter(
+        x,
+        order["sec_section_count"],
+        s=55,
+        color=TH.BLUE,
+        edgecolor=TH.SURFACE,
+        linewidth=1.4,
+        zorder=3,
+    )
+    ax1.set_ylabel("Sections per song\n(mean)")
+    ax1.set_ylim(0, order["sec_section_count"].max() + 1.5)
+    ax1.set_title("The scaffolding holds steady while the words thin")
+
+    ax2.plot(x, order["sec_chorus_share"] * 100, color=TH.ORANGE, lw=2.2)
+    ax2.scatter(
+        x,
+        order["sec_chorus_share"] * 100,
+        s=55,
+        color=TH.ORANGE,
+        edgecolor=TH.SURFACE,
+        linewidth=1.4,
+        zorder=3,
+    )
+    ax2.set_ylabel("Share of lines\nin a chorus (%)")
+    ax2.set_ylim(0, (order["sec_chorus_share"] * 100).max() + 12)
+    ax2.set_xlabel("Album release")
+
+    # Direct-label the endpoints on the top panel so album identities are legible
+    # without a legend, matching the other time-series charts.
+    for _, row in pd.concat([order.head(1), order.tail(1)]).iterrows():
+        ax1.annotate(
+            SHORT_INLINE[row["album"]],
+            (row["release_date"], row["sec_section_count"]),
+            textcoords="offset points",
+            xytext=(0, 10),
+            ha="center",
+            fontsize=8.2,
+            color=TH.INK_2,
+        )
+    fig.tight_layout()
     return fig
 
 
@@ -360,8 +637,7 @@ def fig_vocab_growth(growth: pd.DataFrame, albums: pd.DataFrame):
     release order. ``growth`` is ``data.build_vocab_growth(...)``."""
     fig, ax = TH.new_fig(9.0, 5.4)
     order = albums.sort_values("release_date")["album"].tolist()
-    color_by_album = {a: TH.CATEGORICAL[i % len(TH.CATEGORICAL)]
-                      for i, a in enumerate(order)}
+    color_by_album = {a: TH.CATEGORICAL[i % len(TH.CATEGORICAL)] for i, a in enumerate(order)}
 
     total = growth["cumulative_words"].to_numpy()
     types = growth["cumulative_types"].to_numpy()
@@ -370,18 +646,29 @@ def fig_vocab_growth(growth: pd.DataFrame, albums: pd.DataFrame):
     # eye can see whether new vocabulary keeps arriving in the late records.
     for album in order:
         mask = growth["album"] == album
-        ax.plot(total[mask], types[mask], color=color_by_album[album], lw=2.4,
-                solid_capstyle="round", zorder=3)
+        ax.plot(
+            total[mask],
+            types[mask],
+            color=color_by_album[album],
+            lw=2.4,
+            solid_capstyle="round",
+            zorder=3,
+        )
     ax.scatter(total, types, s=12, color=TH.INK, alpha=0.25, zorder=2)
 
     # Direct album labels at each album's last point, no legend.
     for album in order:
         sub = growth[growth["album"] == album]
         last = sub.iloc[-1]
-        ax.annotate(SHORT_INLINE[album],
-                    (last["cumulative_words"], last["cumulative_types"]),
-                    textcoords="offset points", xytext=(6, -2), fontsize=7.8,
-                    color=color_by_album[album], va="center")
+        ax.annotate(
+            SHORT_INLINE[album],
+            (last["cumulative_words"], last["cumulative_types"]),
+            textcoords="offset points",
+            xytext=(6, -2),
+            fontsize=7.8,
+            color=color_by_album[album],
+            va="center",
+        )
 
     ax.set_xlabel("Cumulative words sung across the career")
     ax.set_ylabel("Cumulative distinct words")

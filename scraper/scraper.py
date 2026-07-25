@@ -9,10 +9,10 @@ import json
 import os
 import re
 import time
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -58,7 +58,9 @@ def fetch_html(url: str, timeout: float, user_agent: str) -> str:
         return response.read().decode(charset, errors="replace")
 
 
-def genius_api_get(path: str, access_token: str, timeout: float, params: dict | None = None) -> dict:
+def genius_api_get(
+    path: str, access_token: str, timeout: float, params: dict | None = None
+) -> dict:
     """Call the Genius API and return the decoded JSON body."""
 
     url = f"{GENIUS_API_BASE}{path}"
@@ -238,22 +240,34 @@ def write_output(
         "songs": song_data,
         "errors": error_data,
     }
-    output_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    output_path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scrape lyrics for an artist from Genius.")
-    parser.add_argument("--artist", default=DEFAULT_ARTIST_NAME, help="Artist name to search for on Genius")
+    parser.add_argument(
+        "--artist", default=DEFAULT_ARTIST_NAME, help="Artist name to search for on Genius"
+    )
     parser.add_argument(
         "--access-token",
         default=os.environ.get("GENIUS_ACCESS_TOKEN"),
         help="Genius API client access token (defaults to the GENIUS_ACCESS_TOKEN env var)",
     )
-    parser.add_argument("--output", default="mitski_lyrics.json", type=Path, help="JSON output path")
-    parser.add_argument("--delay", default=1.0, type=float, help="Seconds to wait between song page requests")
+    parser.add_argument(
+        "--output", default="mitski_lyrics.json", type=Path, help="JSON output path"
+    )
+    parser.add_argument(
+        "--delay", default=1.0, type=float, help="Seconds to wait between song page requests"
+    )
     parser.add_argument("--timeout", default=15.0, type=float, help="HTTP timeout in seconds")
-    parser.add_argument("--user-agent", default=DEFAULT_USER_AGENT, help="HTTP User-Agent header for song pages")
-    parser.add_argument("--limit", default=None, type=int, help="Optional maximum number of songs to scrape")
+    parser.add_argument(
+        "--user-agent", default=DEFAULT_USER_AGENT, help="HTTP User-Agent header for song pages"
+    )
+    parser.add_argument(
+        "--limit", default=None, type=int, help="Optional maximum number of songs to scrape"
+    )
     parser.add_argument(
         "--include-features",
         action="store_true",

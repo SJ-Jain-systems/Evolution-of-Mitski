@@ -94,11 +94,13 @@ def fig3d_trajectory(albums: pd.DataFrame):
 
     # Album markers, coloured by release year on the house blue ramp so travel
     # direction (early = light, late = dark) is legible at a glance.
-    ax.scatter(x, y, z, s=70, c=colors, edgecolor=TH.SURFACE, linewidth=1.2,
-               depthshade=False, zorder=3)
+    ax.scatter(
+        x, y, z, s=70, c=colors, edgecolor=TH.SURFACE, linewidth=1.2, depthshade=False, zorder=3
+    )
     for xi, yi, zi, name in zip(x, y, z, order["album"]):
-        ax.text(xi, yi, zi + 0.12, SHORT[name], fontsize=7.5, color=TH.INK_2,
-                ha="center", va="bottom")
+        ax.text(
+            xi, yi, zi + 0.12, SHORT[name], fontsize=7.5, color=TH.INK_2, ha="center", va="bottom"
+        )
 
     ax.set_xlabel("Words per minute  →  denser")
     ax.set_ylabel("Lexical diversity (MATTR)  →  wider")
@@ -120,15 +122,22 @@ def fig3d_motif_terrain(albums: pd.DataFrame):
     labels = [SHORT[a] for a in order["album"]]
 
     # Rows = albums (time), cols = motifs; Z = rate per 1k words.
-    Z = np.array([[row[f"motif_{m}_per_1k"] for m in motifs]
-                  for _, row in order.iterrows()])
+    Z = np.array([[row[f"motif_{m}_per_1k"] for m in motifs] for _, row in order.iterrows()])
     ncol, nrow = len(motifs), len(order)
     X, Y = np.meshgrid(np.arange(ncol), np.arange(nrow))
 
     fig, ax = TH.new_fig3d(width=8.8, height=6.8)
     surf = ax.plot_surface(
-        X, Y, Z, cmap=TH.sequential_cmap(), rcount=nrow, ccount=ncol,
-        linewidth=0.3, edgecolor=TH.SURFACE, antialiased=True, shade=True,
+        X,
+        Y,
+        Z,
+        cmap=TH.sequential_cmap(),
+        rcount=nrow,
+        ccount=ncol,
+        linewidth=0.3,
+        edgecolor=TH.SURFACE,
+        antialiased=True,
+        shade=True,
     )
 
     ax.set_xticks(np.arange(ncol))
@@ -153,23 +162,37 @@ def fig3d_motif_terrain(albums: pd.DataFrame):
 # --------------------------------------------------------------------------- #
 def fig3d_song_cloud(songs: pd.DataFrame, albums: pd.DataFrame):
     order = albums.sort_values("release_date")["album"].tolist()
-    color_by_album = {a: TH.CATEGORICAL[i % len(TH.CATEGORICAL)]
-                      for i, a in enumerate(order)}
+    color_by_album = {a: TH.CATEGORICAL[i % len(TH.CATEGORICAL)] for i, a in enumerate(order)}
 
     fig, ax = TH.new_fig3d(width=8.8, height=6.8)
     for album in order:
         sub = songs[songs["album"] == album]
-        ax.scatter(sub["word_count"], sub["mattr"], sub["mean_word_length"],
-                   s=26, color=color_by_album[album], edgecolor=TH.SURFACE,
-                   linewidth=0.4, alpha=0.9, depthshade=False, label=SHORT[album])
+        ax.scatter(
+            sub["word_count"],
+            sub["mattr"],
+            sub["mean_word_length"],
+            s=26,
+            color=color_by_album[album],
+            edgecolor=TH.SURFACE,
+            linewidth=0.4,
+            alpha=0.9,
+            depthshade=False,
+            label=SHORT[album],
+        )
 
     ax.set_xlabel("Words per song")
     ax.set_ylabel("Lexical diversity (MATTR)")
     ax.set_zlabel("Mean word length")
     _title(ax, "Every song in three dimensions")
     ax.view_init(elev=18, azim=-60)
-    ax.legend(loc="upper left", bbox_to_anchor=(0.0, 0.95), fontsize=7.5,
-              frameon=False, handletextpad=0.2, labelcolor=TH.INK_2)
+    ax.legend(
+        loc="upper left",
+        bbox_to_anchor=(0.0, 0.95),
+        fontsize=7.5,
+        frameon=False,
+        handletextpad=0.2,
+        labelcolor=TH.INK_2,
+    )
     return fig
 
 
@@ -187,11 +210,11 @@ def fig3d_pronoun_trajectory(albums: pd.DataFrame):
 
     fig, ax = TH.new_fig3d()
     ax.plot(xi, yi, zi, color=TH.MUTED, lw=1.8, zorder=1)
-    ax.scatter(xi, yi, zi, s=70, c=colors, edgecolor=TH.SURFACE, linewidth=1.2,
-               depthshade=False, zorder=3)
+    ax.scatter(
+        xi, yi, zi, s=70, c=colors, edgecolor=TH.SURFACE, linewidth=1.2, depthshade=False, zorder=3
+    )
     for a, b, c, name in zip(xi, yi, zi, order["album"]):
-        ax.text(a, b, c + 0.01, SHORT[name], fontsize=7.5, color=TH.INK_2,
-                ha="center", va="bottom")
+        ax.text(a, b, c + 0.01, SHORT[name], fontsize=7.5, color=TH.INK_2, ha="center", va="bottom")
 
     pct = FuncFormatter(lambda v, _p: f"{v:.0%}")
     ax.xaxis.set_major_formatter(pct)
@@ -210,8 +233,7 @@ def fig3d_pronoun_trajectory(albums: pd.DataFrame):
 # Rotation animation: spin a 3D figure a full turn and save it as a GIF, so the
 # depth the old drag-to-rotate gave is recoverable with no JavaScript.
 # --------------------------------------------------------------------------- #
-def spin(fig, out_path, frames: int = 72, elev: float | None = None,
-         fps: int = 18, dpi: int = 90):
+def spin(fig, out_path, frames: int = 72, elev: float | None = None, fps: int = 18, dpi: int = 90):
     """Write a 360-degree azimuthal rotation of ``fig``'s 3D axes to ``out_path``.
 
     Uses matplotlib's ``FuncAnimation`` + ``PillowWriter`` (a GIF; Pillow ships
