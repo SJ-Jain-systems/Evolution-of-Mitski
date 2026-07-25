@@ -45,10 +45,6 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-# The scraper is a separate, self-contained stdlib-only tool with its own
-# requirements; it is not part of the analysis package and is linted on its own
-# terms.
-extend-exclude = ["scraper"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

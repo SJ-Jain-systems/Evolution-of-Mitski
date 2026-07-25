@@ -32,9 +32,18 @@ def tables():
 
 def test_album_only_figures_build(tables):
     albums, _, _ = tables
-    for builder in (F.fig_wpm_over_time, F.fig_wpm_vs_diversity_panels,
-                    F.fig_inverse_scatter, F.fig_pronoun_mix, F.fig_motif_heatmap,
-                    F.fig_valence_over_time, F.fig_trilogy, F.fig_refrain_over_time):
+    for builder in (
+        F.fig_wpm_over_time,
+        F.fig_wpm_vs_diversity_panels,
+        F.fig_inverse_scatter,
+        F.fig_pronoun_mix,
+        F.fig_motif_heatmap,
+        F.fig_valence_over_time,
+        F.fig_trilogy,
+        F.fig_refrain_over_time,
+        F.fig_rhyme_over_time,
+        F.fig_structure_over_time,
+    ):
         fig = builder(albums)
         assert isinstance(fig, matplotlib.figure.Figure)
         assert fig.axes  # at least one axes drawn
@@ -54,6 +63,7 @@ def test_vocab_growth_builds(tables):
 
 if __name__ == "__main__":
     import traceback
+
     albums, songs, growth = build_album_table(), build_song_table(), build_vocab_growth()
 
     def _run():

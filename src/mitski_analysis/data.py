@@ -69,6 +69,8 @@ def build_song_table(root: Path | None = None) -> pd.DataFrame:
     for song in corpus["songs"]:
         by_key.setdefault(_match_key(song["title"]), song)
 
+    pron_lexicon = T.load_pronunciation_lexicon(root)
+
     rows = []
     missing = []
     for album in meta["albums"]:
@@ -92,12 +94,12 @@ def build_song_table(root: Path | None = None) -> pd.DataFrame:
             }
             row.update({f"pron_{k}": v for k, v in T.pronoun_counts(lyrics).items()})
             row.update({f"motif_{k}": v for k, v in T.motif_counts(lyrics).items()})
+            row.update(T.rhyme_summary(lyrics, pron_lexicon))
+            row.update({f"sec_{k}": v for k, v in T.section_summary(lyrics).items()})
             rows.append(row)
 
     if missing:
-        raise ValueError(
-            "Canonical tracks missing from the corpus:\n  " + "\n  ".join(missing)
-        )
+        raise ValueError("Canonical tracks missing from the corpus:\n  " + "\n  ".join(missing))
 
     return pd.DataFrame(rows)
 
@@ -119,6 +121,7 @@ def build_album_table(root: Path | None = None) -> pd.DataFrame:
         by_key.setdefault(_match_key(song["title"]), song)
 
     valence_lexicon = T.load_valence_lexicon(root)
+    pron_lexicon = T.load_pronunciation_lexicon(root)
 
     rows = []
     for album in meta["albums"]:
@@ -131,6 +134,14 @@ def build_album_table(root: Path | None = None) -> pd.DataFrame:
         pron = T.pronoun_counts(blob)
         motif = T.motif_counts(blob)
         vstats = T.valence_stats(blob, valence_lexicon)
+        rsum = T.rhyme_summary(blob, pron_lexicon)
+        # Section structure is a per-song property, so average each track's
+        # section metrics rather than parsing the concatenated blob (which would
+        # merge songs and conflate their section counts / bridges).
+        sec_per_track = [T.section_summary(t) for t in texts]
+        sec_avg = {
+            k: sum(s[k] for s in sec_per_track) / len(sec_per_track) for k in sec_per_track[0]
+        }
         row = {
             "album": album["album"],
             "album_no": album["album_no"],
@@ -167,6 +178,20 @@ def build_album_table(root: Path | None = None) -> pd.DataFrame:
             "valence_std": vstats["valence_std"],
             "valence_range": vstats["valence_range"],
             "valence_coverage": vstats["valence_coverage"],
+            # End-rhyme density of the album's line-final words (from the bundled
+            # CMU pronunciation subset); rhyme_coverage caveats how many line-end
+            # words the dictionary knows, mirroring valence_coverage.
+            "rhyme_density": rsum["rhyme_density"],
+            "end_rhyme_pairs_per_line": rsum["end_rhyme_pairs_per_line"],
+            "rhyme_coverage": rsum["rhyme_coverage"],
+            # Song structure, averaged over the album's tracks: mean sections per
+            # song, mean chorus share, share of songs with a bridge, and mean
+            # whole-section repetition. (sec_section_count is a per-song mean.)
+            "sec_section_count": sec_avg["section_count"],
+            "sec_distinct_section_types": sec_avg["distinct_section_types"],
+            "sec_chorus_share": sec_avg["chorus_share"],
+            "sec_has_bridge": sec_avg["has_bridge"],
+            "sec_section_repetition": sec_avg["section_repetition"],
         }
         total_pron = sum(pron.values()) or 1
         for k, v in pron.items():
@@ -213,13 +238,15 @@ def build_distinctive_table(root: Path | None = None, n: int = 8) -> pd.DataFram
             if j != i:
                 background.update(other)
         scored = T.distinctive_words(target, background, n=n)
-        rows.append({
-            "album": album["album"],
-            "album_no": album["album_no"],
-            "release_year": pd.Timestamp(album["release_date"]).year,
-            "words": ", ".join(w for w, _ in scored),
-            "scored": scored,
-        })
+        rows.append(
+            {
+                "album": album["album"],
+                "album_no": album["album_no"],
+                "release_year": pd.Timestamp(album["release_date"]).year,
+                "words": ", ".join(w for w, _ in scored),
+                "scored": scored,
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -249,19 +276,28 @@ def build_vocab_growth(root: Path | None = None) -> pd.DataFrame:
             tokens = T.tokenize(by_key[_match_key(track)]["lyrics"])
             cum_words += len(tokens)
             seen.update(tokens)
-            rows.append({
-                "album": album["album"],
-                "album_no": album["album_no"],
-                "release_year": pd.Timestamp(album["release_date"]).year,
-                "title": track,
-                "cumulative_words": cum_words,
-                "cumulative_types": len(seen),
-            })
+            rows.append(
+                {
+                    "album": album["album"],
+                    "album_no": album["album_no"],
+                    "release_year": pd.Timestamp(album["release_date"]).year,
+                    "title": track,
+                    "cumulative_words": cum_words,
+                    "cumulative_types": len(seen),
+                }
+            )
     return pd.DataFrame(rows)
 
 
 if __name__ == "__main__":  # quick smoke check
     albums = build_album_table()
-    cols = ["album", "release_year", "total_words", "duration_minutes",
-            "words_per_minute", "mattr", "repetition_index"]
+    cols = [
+        "album",
+        "release_year",
+        "total_words",
+        "duration_minutes",
+        "words_per_minute",
+        "mattr",
+        "repetition_index",
+    ]
     print(albums[cols].to_string(index=False))

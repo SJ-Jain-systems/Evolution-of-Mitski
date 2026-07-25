@@ -26,6 +26,7 @@ def pearson_r(x, y) -> float:
 @dataclass(frozen=True)
 class CorrelationCI:
     """A correlation with a bootstrap confidence interval."""
+
     r: float
     lo: float
     hi: float
@@ -35,8 +36,7 @@ class CorrelationCI:
         return f"r = {self.r:.2f} (95% CI {self.lo:.2f} to {self.hi:.2f})"
 
 
-def bootstrap_r(x, y, n_boot: int = 10000, ci: float = 0.95,
-                seed: int = 0) -> CorrelationCI:
+def bootstrap_r(x, y, n_boot: int = 10000, ci: float = 0.95, seed: int = 0) -> CorrelationCI:
     """Pearson r for ``x`` vs ``y`` with a percentile bootstrap CI.
 
     Pairs ``(x_i, y_i)`` are resampled with replacement ``n_boot`` times; the CI
@@ -61,7 +61,7 @@ def bootstrap_r(x, y, n_boot: int = 10000, ci: float = 0.95,
     xm = xs - xs.mean(axis=1, keepdims=True)
     ym = ys - ys.mean(axis=1, keepdims=True)
     num = (xm * ym).sum(axis=1)
-    den = np.sqrt((xm ** 2).sum(axis=1) * (ym ** 2).sum(axis=1))
+    den = np.sqrt((xm**2).sum(axis=1) * (ym**2).sum(axis=1))
     with np.errstate(invalid="ignore", divide="ignore"):
         rs = np.where(den > 0, num / den, np.nan)
     rs = rs[np.isfinite(rs)]

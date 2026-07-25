@@ -267,6 +267,37 @@ F.fig_vocab_growth(growth, albums)
 plt.show()
 ```
 
+## Does the rhyming thin out too?
+
+Word repetition is one kind of echo; rhyme is another, and it lives in *sound*
+rather than spelling. To hear it we bundle a subset of the CMU Pronouncing
+Dictionary (ARPABET phonemes, trimmed to the corpus vocabulary and stored under
+`data/lexicons/` like the AFINN file) and compare the **rime** of each line's
+final word — its last stressed vowel to the end — with its neighbours'. Two lines
+rhyme when those rimes match; `rhyme_density` is the share of line-ends that
+rhyme with a nearby line. The pronunciation dictionary knows almost every
+line-final word (`rhyme_coverage` stays above 0.97 on every album), so the
+picture is not an artefact of missing pronunciations.
+
+It would fit the "saying less" arc if the rhyming faded over the years. It does
+not — at least not with the calendar. Against release year the trend is weak and
+its interval straddles zero
+(`{python} ci("release_year", "rhyme_density")`). What rhyme density actually
+tracks is **word density**: the more words per minute an album has, the more of
+its line-ends rhyme (`{python} ci("words_per_minute", "rhyme_density")`). This is
+the same shape as the refrain and repetition findings — the sparse late records
+rhyme less not because Mitski stopped rhyming by the calendar, but because there
+are simply fewer words there to rhyme. *The Land* and the early, spiky *Bury Me
+at Makeout Creek* sit lowest; the wordy *Retired from Sad* and *Puberty 2* sit
+highest.
+
+```{python}
+#| label: fig-rhyme
+#| fig-cap: "End-rhyme density against words per minute. Rhyme tracks how many words there are to rhyme, not the year."
+F.fig_rhyme_over_time(albums)
+plt.show()
+```
+
 # Finding 3: the songs themselves are thinning {#sec-songs}
 
 Album density could fall two ways. The songs could get shorter, or the same
@@ -284,6 +315,33 @@ the last, from an average near 173 words per song on *Lush* to near 134 on *The
 Land*. The spread narrows too. The later albums have fewer sprawling, high-word
 outliers. She is not just spreading the same lyrics thinner. She is writing
 shorter.
+
+## But the scaffolding stays put
+
+If the songs are shrinking, are they losing their *shape* too — fewer verses,
+less chorus, no bridge? The transcriptions keep every section marker
+(`[Verse 1]`, `[Chorus]`, `[Bridge]`), so we can read structure directly:
+`parse_sections` splits each lyric on those tags, and `section_summary` counts
+the blocks, the share of lines that sit in a chorus, and whether a bridge is
+present.
+
+The answer is that the scaffolding barely moves. A Mitski song runs about five
+sections and gives roughly a third of its lines to a chorus on the first album
+and on the last, with no trend the seven-album sample can distinguish from noise
+(sections per song vs. year, `{python} ci("release_year", "sec_section_count")`;
+chorus share vs. year, `{python} ci("release_year", "sec_chorus_share")`). The
+one faint drift is the bridge: it is common on the early records and nearly gone
+by *The Land* (`{python} ci("release_year", "sec_has_bridge")`), though even that
+band still brushes zero. The compression is happening *inside* the sections —
+shorter lines, shorter songs — not by tearing out the verse-chorus frame. Mitski
+is saying less within the same architecture, not abandoning it.
+
+```{python}
+#| label: fig-structure
+#| fig-cap: "Mean sections per song (top) and the share of lines in a chorus (bottom). Both hold roughly flat as the words thin."
+F.fig_structure_over_time(albums)
+plt.show()
+```
 
 # What each album is about, in its own words {#sec-distinctive}
 
