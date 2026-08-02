@@ -1,14 +1,33 @@
 ---
 title: "Saying Less, Meaning More"
-subtitle: "How Mitski's lyrics thinned out and sharpened across seven albums"
-author: "Mitski-Lyrics-Over-Time"
+subtitle: "Lyrical distillation across Mitski's discography, 2012–2023"
+author: "Shreyans Jain"
 date: last-modified
+abstract: |
+  A widely circulated video essay contends that the songwriter Mitski "is
+  literally saying less over time." This report treats that assertion not as a
+  verdict but as a hypothesis, and tests it against the complete lyrics of her
+  seven studio albums (2012–2023). I operationalize "saying less" as lexical
+  density (words sung per minute of music), and pair it with three length-robust
+  measures of lexical variety, a weighted log-odds model of each album's
+  distinctive vocabulary, and hand-curated lexicons for imagery, address, and
+  sentiment. The evidence both supports the surface claim and complicates it.
+  Lexical density declines across the career and the songs themselves grow
+  shorter; yet the vocabulary that remains becomes less repetitive and more
+  varied, most sharply across the mature run of records, where density and
+  repetition move almost in lockstep. I read this configuration through the lens
+  of *distillation*: the mature writer draws more expressive yield from less
+  language, so that the falling word count is better understood as a paring to
+  essence than as attrition. A null result in word-level sentiment (the album
+  most preoccupied with death scores lexically positive) is itself diagnostic of
+  the method Mitski works in, the darkest meaning carried in the plainest words,
+  and a caution about the limits of dictionary-based measurement.
 format:
   html:
     theme: cosmo
     toc: true
     toc-depth: 2
-    toc-title: "On this page"
+    toc-title: "Contents"
     number-sections: true
     code-fold: true
     code-summary: "Show the code"
@@ -81,53 +100,87 @@ def ci(xcol, ycol, frame=None):
     return str(ST.bootstrap_r(frame[xcol], frame[ycol]))
 ```
 
+# Introduction {#sec-intro}
+
 > *"I took every Mitski album and I grabbed the duration and the number of words
 > she used… to show you that she is literally saying less over time. But it's not
 > that simple."*
 
-That line comes from a short video essay. It is a good claim to start from,
-because it is specific, countable, and easy to prove wrong. So we checked it
-against the lyrics.
+The claim belongs to a short video essay, and it possesses the two properties
+that make an aesthetic claim worth the trouble of examining: it is specific, and
+it is falsifiable. To assert that an artist is "saying less over time" is not, in
+this framing, a matter of taste but of arithmetic: words counted, minutes
+measured, a slope estimated. An assertion of that kind either survives contact
+with the corpus or it does not. This report takes the claim at its word,
+reconstructs the measurements it rests on from the primary lyrics, and then
+presses past the single number that the video stops at.
 
-We pulled the words of Mitski's seven studio albums and measured two things: how
-many words she sings per minute of music, and how varied that vocabulary is.
-Then we kept going. We looked at who her songs address, which words set each
-record apart, what images keep coming back, and how the album covers tell their
-own story of pulling the camera back.
+I argue that the popular claim is correct in its premise and incomplete in its
+conclusion. Mitski is, verifiably, using fewer words as her career advances; the
+lyrics thin, and the songs that carry them grow shorter. But a bare count of
+words mistakes volume for substance. When the same corpus is examined for
+variety rather than quantity, asking how much of the surviving vocabulary is
+distinct rather than repeated, how widely it ranges, and how heavily each word is
+asked to work, the reduction reverses its meaning. The words that remain are less
+repetitive, not more; the palette widens as the output shrinks. The interesting
+finding is therefore not that Mitski says less, which is nearly trivial once
+measured, but that saying less appears to be the mechanism by which she says
+more.
 
-Here is the short version. She really is saying less over time, and the less she
-says, the more each word carries. The longer version is the rest of this page,
-and it is the better story.
+This report proceeds in three movements. It first establishes the descriptive
+fact of declining density and the shortening of individual songs. It then
+demonstrates that lexical variety moves inversely to volume, most cleanly across
+the mature run of records, and that the same inverse pattern governs repetition
+at the level of lines and of rhyme. Finally, it turns from how much Mitski says
+to what she says: the distinctive vocabulary of each album, the pronouns that fix
+its stance, the recurring imagery, and the word-level sentiment that, tellingly,
+refuses to follow the darkening of her subjects. Every quantity below is computed
+from the committed data by the code in `src/mitski_analysis/`; the figures are
+not illustrations of an argument made elsewhere but the argument itself.
 
-# The thesis in one sentence
+# Distillation, not attrition: an interpretive frame {#sec-frame}
 
-Two numbers per album, plotted against time:
+Before turning to the data it is worth naming the lens through which I read it,
+because the same measurements admit a poorer reading and a richer one, and the
+difference is not statistical but interpretive. The poorer reading treats a
+falling word count as attrition: an artist with less to say, or fewer means of
+saying it, whose later work is thinner in the plain sense of the word. The
+richer reading, which I will defend, treats it as *distillation*: a maturing
+writer who extracts more expressive yield from less language, for whom the
+reduction in words is a deliberate concentration rather than a depletion.
 
-1. **Words per minute.** How densely packed the lyrics are, measured as total
-   words divided by album runtime.
-2. **Lexical diversity.** How much of that vocabulary is distinct rather than
-   repeated.
+The distinction matters because the two readings make different, testable
+predictions. If the late records are merely thinner, their reduced vocabulary
+should also be more repetitive: fewer words, more heavily reused, the language of
+a writer running short. If instead the reduction is distillation, the opposite
+should hold, with fewer words drawn from a *wider* and less repetitive set, each
+carrying more of the load precisely because there are fewer of them.
+Distillation, so framed, is not a mood I am imposing on the songs but a
+hypothesis with a sign attached, and the burden of the analysis is to determine
+which sign the data bear. The reader should hold the frame lightly through the
+descriptive sections and judge it against the evidence assembled in the
+discussion.
 
-If the first falls while the second holds or rises, Mitski is doing more with
-less: fewer words, but a wider and less repetitive palette. That is what the data
-shows, and it shows it most cleanly across her mature run of records.
-
-# The data and how it was built {#sec-data}
+# The corpus and its construction {#sec-data}
 
 The lyric corpus is a Genius scrape of 153 Mitski entries, cleaned of scraper
-noise by `scripts/clean_lyrics.py`. That corpus has a problem for our question.
-It carries no album, release-date, or duration fields, and it mixes canonical
+noise by `scripts/clean_lyrics.py`. That corpus, in its raw form, is unfit for
+the question at hand for two reasons. It carries no album, release-date, or
+duration fields, so nothing in it is ordered in time; and it mixes canonical
 album tracks with live versions, demos, translations, covers, and one-off
-singles.
+singles, so nothing in it is bounded to the studio discography the claim is
+actually about.
 
-To ask anything about albums *over time*, we had to rebuild that structure.
+To ask anything about albums *over time*, that structure had to be rebuilt.
 `data/metadata/albums.json` supplies each studio album's canonical tracklist,
-release date, and total running time. Durations come from Discogs, Apple Music,
-and Wikipedia, and each one is recorded with its source in the file.
-`src/mitski_analysis/data.py` joins the two. It matches on a
-punctuation-insensitive title key, so curly apostrophes and slashes line up, and
-it fails loudly if any canonical track is missing. The album totals can never
-quietly drop a song.
+release date, and total running time; the durations are drawn from Discogs,
+Apple Music, and Wikipedia, and each is recorded with its source in the file so
+that the provenance of every runtime is auditable. `src/mitski_analysis/data.py`
+performs the join. It matches on a punctuation-insensitive title key, so that
+curly apostrophes and slashes align rather than silently splitting a track, and
+it fails loudly if any canonical track is absent, so that an album total can
+never quietly drop a song. The design choice is deliberately conservative: the
+pipeline would rather halt than report a plausible but incomplete number.
 
 ```{python}
 #| label: tbl-corpus
@@ -142,34 +195,48 @@ summary = pd.DataFrame({
 summary
 ```
 
-Everything below is computed from the lyrics of those `{python} n_tracks`
-canonical tracks. Bonus remixes, live takes, and covers are left out on purpose,
-so we compare studio albums to studio albums.
+Everything that follows is computed from the lyrics of those
+`{python} n_tracks` canonical tracks. Bonus remixes, live takes, and covers are
+excluded by design, so that the comparison is studio album against studio album
+and the trend cannot be an artefact of which incidental recordings happened to
+be scraped.
 
-## How the metrics are defined
+## Operationalizing the measures {#sec-measures}
 
-**Words per minute** is total lyric tokens divided by the album's runtime in
-minutes. The word counts are exact, measured straight from the text. The
-durations are the reported album totals, accurate to a few seconds. Because the
-counts are exact and the albums cluster tightly in length, roughly 24 to 32
-minutes, the trend is driven by vocabulary, not by rounding in the runtimes.
+Lexical density, the quantity the video reduces to, is total lyric tokens
+divided by the album's runtime in minutes. The word counts are exact, measured
+directly from the text; the durations are the reported album totals, accurate to
+within a few seconds. Because the counts are exact and the albums cluster
+tightly in length (roughly twenty-four to thirty-two minutes), the trend in
+density is driven by vocabulary rather than by rounding in the runtimes, a point
+I return to in the limitations.
 
-**Lexical diversity** is trickier, because the obvious measure is a trap. A raw
-type-token ratio (unique divided by total words) falls automatically as a text
-gets longer, since common words are bound to recur. Wordier albums would look
-less diverse for a purely mechanical reason. So we report three views instead of
-one:
+Lexical variety is the more delicate construct, because the obvious measure is a
+trap. A raw type-token ratio (unique words divided by total words) declines
+automatically as a text lengthens, since high-frequency words are bound to
+recur; a wordier album would therefore appear less varied for a purely
+mechanical reason, and any inverse relationship between volume and variety would
+be an artefact rather than a finding.[^ttr] To guard against reading a
+mathematical necessity as a claim about Mitski, I report three complementary
+views rather than one:
 
-- **Repetition index** (total divided by unique) is the video's own definition.
-  Higher means each word is reused more often.
-- **MATTR**, the moving-average type-token ratio over 50-word windows, is a
-  length-robust diversity measure. Higher means more varied.
-- **Guiraud's root-TTR** and the **hapax ratio** (the share of words used exactly
-  once) come along as supporting checks.
+- The repetition index (total divided by unique) is the video's own definition,
+  retained so that the popular claim is tested on its own terms; a higher value
+  means each word is reused more often.
+- MATTR, the moving-average type-token ratio computed over fifty-word windows,
+  is a length-robust measure of variety that is not confounded by text length,
+  and it carries the analytic weight wherever the two measures disagree.[^mattr]
+- Guiraud's root type-token ratio and the hapax ratio (the share of words used
+  exactly once) serve as supporting checks against the first two.[^guiraud]
 
-All of them live in `src/mitski_analysis/text.py` and are unit-tested.
+All four are implemented in `src/mitski_analysis/text.py` and are unit-tested, so
+that the definitions are fixed in code and reproducible rather than described
+loosely in prose. Because seven albums is a small sample, every correlation
+reported below is accompanied by a percentile-bootstrap 95% interval rather than
+a bare coefficient, so that the width of what the data can support is always
+visible alongside its central estimate.[^boot]
 
-# Finding 1: she is saying less over time {#sec-wpm}
+# Finding 1: the lyrics grow less dense {#sec-wpm}
 
 ```{python}
 #| label: fig-wpm
@@ -178,13 +245,16 @@ F.fig_wpm_over_time(albums)
 plt.show()
 ```
 
-The density of Mitski's lyrics falls across her career. The correlation between
-release year and words per minute is **`{python} ci("release_year", "words_per_minute")`**
-(seven albums, so the interval is wide, but the whole band is negative).
+The density of Mitski's lyrics falls across her career, and the fall is the
+report's one uncontested descriptive fact. The correlation between release year
+and words per minute is
+`{python} ci("release_year", "words_per_minute")`; with only seven albums the
+interval is necessarily wide, but the entire band lies below zero, so the
+direction of the trend is not in question even where its precise magnitude is.
 The two self-released early records, *Lush* and *Retired from Sad, New Career in
-Business*, are the wordiest and the busiest. *Retired* is the densest album she
-has made, at 69 words a minute. From *Puberty 2* onward the decline is almost
-unbroken.
+Business*, are the wordiest and the busiest, with *Retired* the densest album she
+has produced, at roughly sixty-nine words a minute. From *Puberty 2* onward the
+decline is nearly unbroken.
 
 ```{python}
 #| label: tbl-wpm
@@ -197,17 +267,21 @@ t["Words / min"] = t["Words / min"].round(1)
 t
 ```
 
-By *The Land Is Inhospitable and So Are We* (2023) she is down to
-**`{python} round(the_land["words_per_minute"], 1)` words per minute**, a third
-sparser than *Retired* a decade earlier. The claim survives contact with the
-data.
+By *The Land Is Inhospitable and So Are We* (2023) the figure has fallen to
+`{python} round(the_land["words_per_minute"], 1)` words per minute, roughly a
+third sparser than *Retired* a decade earlier. The premise of the popular claim
+thus survives its first contact with the data: on the metric the video actually
+proposes, Mitski is measurably saying less. Whether that reduction is thinning or
+concentration is the question the remaining findings adjudicate.
 
-# Finding 2: the less she says, the more each word does {#sec-diversity}
+# Finding 2: variety rises as volume falls {#sec-diversity}
 
-"Saying less" would be a thin story if the words that stayed were just as
-repetitive. They are not. The video's move is to divide total words by unique
-words. When that **repetition index** is low, Mitski is leaning on a wider set of
-distinct words to fill the same space.
+"Saying less" would be an impoverishing story if the words that remained were as
+repetitive as the ones they replaced. They are not, and the sign of that
+difference is the crux of the distillation reading. The video's own instrument is
+serviceable here: dividing total words by unique words yields a repetition index
+that is low precisely when Mitski is drawing on a wider set of distinct words to
+fill the same musical space.
 
 ```{python}
 #| label: fig-panels
@@ -216,12 +290,15 @@ F.fig_wpm_vs_diversity_panels(albums)
 plt.show()
 ```
 
-The length-robust diversity measure (MATTR, bottom panel) does not mirror
-wordiness on *every* album. It is highest on the sparse, early *Bury Me at
-Makeout Creek* and again on the sparse, late *The Land*, and it dips through the
-wordier middle records. That U-shape is the point. Mitski's least wordy albums
-tend to be her most varied. Plot the two measures against each other and the
-relationship comes straight out:
+The length-robust measure (MATTR, lower panel) does not simply mirror wordiness
+album by album, and its departures are informative. It is highest on the sparse,
+early *Bury Me at Makeout Creek* and again on the sparse, late *The Land*, and it
+sags through the wordier middle records, a U-shape whose two rising arms fall at
+the least wordy points of the career. That non-monotonicity is not noise to be
+smoothed away; it is the finding. Mitski's least verbose albums tend to be her
+most varied, which is exactly the configuration the distillation hypothesis
+predicts and the attrition hypothesis forbids. Plotting the two measures directly
+against each other makes the relationship legible:
 
 ```{python}
 #| label: fig-scatter
@@ -230,23 +307,29 @@ F.fig_inverse_scatter(albums)
 plt.show()
 ```
 
-Across all seven albums, denser records are more repetitive
-(`{python} ci("words_per_minute", "repetition_index")`). Restrict
-the view to the mature era, *Puberty 2* forward, where she is a fully formed
-writer, and the relationship becomes nearly deterministic:
-**`{python} ci("words_per_minute", "repetition_index", mature)`** between words
-per minute and repetition.
-*The Land* sits by itself in the bottom-left corner. It has the fewest words per
-minute and the least repetition of anything she has released. When Mitski uses
-the least, each word has to do the most, so she reaches for a wider vocabulary to
-say it.
+Across all seven albums, denser records are the more repetitive ones
+(`{python} ci("words_per_minute", "repetition_index")`), though with a sample
+this small the interval spans zero and the pooled estimate should be read as
+suggestive rather than settled. Restricting the view to the mature era (*Puberty
+2* forward, where Mitski is a fully formed writer working without the constraints
+of self-release) sharpens the relationship into something close to deterministic:
+`{python} ci("words_per_minute", "repetition_index", mature)` between words per
+minute and repetition, an interval that clears zero comfortably. The contrast
+between the pooled and the mature-era estimates is itself substantive. It
+suggests that the inverse coupling of volume and repetition is not a fixed law of
+Mitski's writing but a discipline she grows into, consolidating over the persona
+records and holding through the late work. *The Land* occupies the extreme corner
+alone, with both the fewest words per minute and the least repetition of anything
+she has released: where she uses the least, each word is asked to do the most,
+and the vocabulary widens to meet the demand.
 
-The line-level picture agrees. When a song leans on a refrain, the same line
-recurs, so the share of repeated lines is a structural cousin of the word-level
-repetition index — and the two move together
+The line-level picture corroborates the word-level one. When a song leans on a
+refrain, the same line recurs, so the share of repeated lines is a structural
+cousin of the word-level repetition index, and the two move together
 (`{python} ci("repetition_index", "refrain_ratio")`). The persona-era records
-lean hardest on the refrain; *The Land* leans least of all, repetitive neither in
-its words nor in its lines.
+lean hardest on the refrain; *The Land* leans least of all, unrepetitive in
+neither its words nor its lines, so that the two independent measures of
+repetition converge on the same album as their common minimum.
 
 ```{python}
 #| label: fig-refrain
@@ -255,10 +338,12 @@ F.fig_refrain_over_time(albums)
 plt.show()
 ```
 
-And the widening vocabulary is not an artefact of where the album lines fall.
-Laid end to end in release order, the running count of *distinct* words keeps
-climbing almost as fast as the total word count: new vocabulary keeps arriving
-right through the sparse late records rather than tailing off.
+The widening vocabulary is, moreover, not an artefact of how the album
+boundaries fall. Laid end to end in release order, the running count of
+*distinct* words continues to climb almost as steeply as the running total,
+which is to say that genuinely new vocabulary keeps arriving through the sparse
+late records rather than tapering off as a writer working a shrinking word-bank
+would predict. Concentration, not depletion, is what the growth curve records.
 
 ```{python}
 #| label: fig-vocab
@@ -267,29 +352,35 @@ F.fig_vocab_growth(growth, albums)
 plt.show()
 ```
 
-## Does the rhyming thin out too?
+## The echo in sound: does the rhyming thin too? {#sec-rhyme}
 
-Word repetition is one kind of echo; rhyme is another, and it lives in *sound*
-rather than spelling. To hear it we bundle a subset of the CMU Pronouncing
-Dictionary (ARPABET phonemes, trimmed to the corpus vocabulary and stored under
-`data/lexicons/` like the AFINN file) and compare the **rime** of each line's
-final word — its last stressed vowel to the end — with its neighbours'. Two lines
-rhyme when those rimes match; `rhyme_density` is the share of line-ends that
-rhyme with a nearby line. The pronunciation dictionary knows almost every
-line-final word (`rhyme_coverage` stays above 0.97 on every album), so the
-picture is not an artefact of missing pronunciations.
+Word repetition is one kind of echo; rhyme is another, resident in *sound*
+rather than in spelling, and it offers an independent test of whether the late
+records are simply doing less. To hear it, the analysis bundles a subset of the
+CMU Pronouncing Dictionary (ARPABET phonemes, trimmed to the corpus vocabulary
+and stored under `data/lexicons/` alongside the AFINN file), and compares the
+*rime* of each line's final word, its last stressed vowel through the end, with
+those of its neighbours.[^cmu] Two lines rhyme when their rimes match;
+`rhyme_density` is the share of line-ends that rhyme with a nearby line. Because
+the dictionary knows nearly every line-final word (`rhyme_coverage` remains above
+0.97 on every album), the resulting picture is not an artefact of missing
+pronunciations.
 
-It would fit the "saying less" arc if the rhyming faded over the years. It does
-not — at least not with the calendar. Against release year the trend is weak and
-its interval straddles zero
-(`{python} ci("release_year", "rhyme_density")`). What rhyme density actually
-tracks is **word density**: the more words per minute an album has, the more of
-its line-ends rhyme (`{python} ci("words_per_minute", "rhyme_density")`). This is
-the same shape as the refrain and repetition findings — the sparse late records
-rhyme less not because Mitski stopped rhyming by the calendar, but because there
-are simply fewer words there to rhyme. *The Land* and the early, spiky *Bury Me
-at Makeout Creek* sit lowest; the wordy *Retired from Sad* and *Puberty 2* sit
-highest.
+It would fit the tidy "saying less" arc if the rhyming faded over the years. It
+does not, at least not against the calendar. The trend in rhyme density against
+release year is weak and its interval straddles zero
+(`{python} ci("release_year", "rhyme_density")`), so time is the wrong variable.
+What rhyme density actually tracks is word density: the more words per minute an
+album carries, the more of its line-ends rhyme
+(`{python} ci("words_per_minute", "rhyme_density")`). This is the same shape the
+refrain and repetition findings take, and it admits the same mechanical reading.
+The sparse late records rhyme less not because Mitski abandoned rhyme as her
+career advanced, but because there are simply fewer words present to rhyme.
+*The Land* and the early, spiky *Bury Me at Makeout Creek* sit lowest; the wordy
+*Retired from Sad* and *Puberty 2* sit highest. Rhyme, in other words, is not an
+independent casualty of the late style; it is a function of the same declining
+volume, which is precisely why it must be modelled against density rather than
+against time.
 
 ```{python}
 #| label: fig-rhyme
@@ -300,8 +391,11 @@ plt.show()
 
 # Finding 3: the songs themselves are thinning {#sec-songs}
 
-Album density could fall two ways. The songs could get shorter, or the same
-songs could get padded with more instrumental space. It is mostly the first one.
+Falling album density could arise two ways. The songs could be getting shorter,
+or the same-length songs could be padded with more instrumental space around an
+unchanged lyric. Distinguishing the two matters for the distillation reading,
+because only the first situates the reduction in the writing itself. It is
+predominantly the first.
 
 ```{python}
 #| label: fig-songs
@@ -310,31 +404,36 @@ F.fig_words_per_song(songs, albums)
 plt.show()
 ```
 
-The typical song loses about a quarter of its words between the first album and
-the last, from an average near 173 words per song on *Lush* to near 134 on *The
-Land*. The spread narrows too. The later albums have fewer sprawling, high-word
-outliers. She is not just spreading the same lyrics thinner. She is writing
-shorter.
+The typical song sheds roughly a quarter of its words between the first album and
+the last (from a mean near 173 words on *Lush* to near 134 on *The Land*), and
+the spread contracts as well, with the later albums producing fewer of the
+sprawling, high-word outliers that populate the early records. Mitski is
+therefore not merely diluting a constant quantity of lyric across longer running
+times; she is writing shorter, and the reduction lives at the level of the
+individual song rather than in the arrangement around it.
 
-## But the scaffolding stays put
+## The scaffolding holds {#sec-structure}
 
-If the songs are shrinking, are they losing their *shape* too — fewer verses,
-less chorus, no bridge? The transcriptions keep every section marker
-(`[Verse 1]`, `[Chorus]`, `[Bridge]`), so we can read structure directly:
-`parse_sections` splits each lyric on those tags, and `section_summary` counts
-the blocks, the share of lines that sit in a chorus, and whether a bridge is
-present.
+If the songs are contracting, are they also losing their *shape*, with fewer
+verses, less chorus, no bridge? The transcriptions preserve every section marker
+(`[Verse 1]`, `[Chorus]`, `[Bridge]`), so structure can be read directly rather
+than inferred: `parse_sections` splits each lyric on those tags, and
+`section_summary` counts the blocks, the share of lines seated in a chorus, and
+whether a bridge is present.
 
 The answer is that the scaffolding barely moves. A Mitski song runs about five
 sections and gives roughly a third of its lines to a chorus on the first album
-and on the last, with no trend the seven-album sample can distinguish from noise
-(sections per song vs. year, `{python} ci("release_year", "sec_section_count")`;
-chorus share vs. year, `{python} ci("release_year", "sec_chorus_share")`). The
-one faint drift is the bridge: it is common on the early records and nearly gone
-by *The Land* (`{python} ci("release_year", "sec_has_bridge")`), though even that
-band still brushes zero. The compression is happening *inside* the sections —
-shorter lines, shorter songs — not by tearing out the verse-chorus frame. Mitski
-is saying less within the same architecture, not abandoning it.
+and on the last alike, with no trend the seven-album sample can distinguish from
+noise (sections per song against year,
+`{python} ci("release_year", "sec_section_count")`; chorus share against year,
+`{python} ci("release_year", "sec_chorus_share")`). The one faint drift is the
+bridge, common on the early records and nearly gone by *The Land*
+(`{python} ci("release_year", "sec_has_bridge")`), though even that band still
+brushes zero and should not be over-read. The paring-down is thus occurring
+*within* the sections, in shorter lines and shorter songs, and not by dismantling
+the verse-chorus frame. Mitski is saying less inside the same architecture rather
+than abandoning the architecture, which is itself consistent with distillation:
+the form is held constant while the language within it is concentrated.
 
 ```{python}
 #| label: fig-structure
@@ -345,17 +444,18 @@ plt.show()
 
 # What each album is about, in its own words {#sec-distinctive}
 
-Counting words tells you how much she says. It does not tell you what she is
-saying. For that, we asked a sharper question: which words is each album full of
-that the *rest* of her catalogue is not?
+Counting words establishes how much Mitski says; it is silent on what she says.
+For that a sharper question is required: which words is each album full of that
+the *rest* of her catalogue is not?
 
 Raw frequency answers the wrong question, because every album's most common words
-are "you", "I", and "the". So we score each word with a weighted log-odds ratio
-against the pooled rest of the discography, using an informative Dirichlet prior
-(Monroe, Colaresi and Quinn, 2008). In plain terms: a word ranks high when it is
-common on one album and rare everywhere else, with rare-word noise damped so a
-single odd line cannot dominate. Function words and leftover transcription tags
-are dropped. What survives is the vocabulary each record is built out of.
+are "you," "I," and "the." I therefore score each word with a weighted log-odds
+ratio against the pooled remainder of the discography, using an informative
+Dirichlet prior, so that a word ranks highly when it is common on one album and
+rare everywhere else, with rare-word noise damped so that a single anomalous line
+cannot dominate the ranking.[^fightin] Function words and residual transcription
+tags are removed. What survives is, in effect, the vocabulary each record is
+built out of.
 
 ```{python}
 #| label: tbl-distinctive
@@ -365,24 +465,26 @@ dt.columns = ["Year", "Album", "Most distinctive words (vs. the rest of the disc
 dt
 ```
 
-Read the table top to bottom and the discography narrates itself. *Lush* is all
-**dive, diver, pearl, liquid, smooth**, the underwater self-image of her debut.
-*Retired from Sad* turns domestic and named: **darling, mom, violin, eggshells**.
-*Bury Me at Makeout Creek* is physical and restless: **breeze, brave, hair,
-breath**. *Puberty 2* is raw nerve: **cry, kill, alone, bedroom**. *Be the
-Cowboy* is the persona album, and its distinctive words are the furniture of a
-performed life: **nobody, husband, diner, dancers**. *Laurel Hell* sharpens to
-**knife, harden, heartbreaker, drown**. And *The Land* narrows to **mine,
-heaven, gone**, the vocabulary of possession and mortality. Each of these words
-is a thread we can pull, and the sections below do exactly that.
+Read top to bottom, the table narrates the discography almost on its own. *Lush*
+is *dive, diver, pearl, liquid, smooth*, the underwater self-image of the debut.
+*Retired from Sad* turns domestic and named: *darling, mom, violin, eggshells*.
+*Bury Me at Makeout Creek* is physical and restless: *breeze, brave, hair,
+breath*. *Puberty 2* is raw nerve: *cry, kill, alone, bedroom*. *Be the Cowboy*,
+the persona album, offers the furniture of a performed life: *nobody, husband,
+diner, dancers*. *Laurel Hell* sharpens to *knife, harden, heartbreaker, drown*.
+And *The Land* narrows to *mine, heaven, gone*, the vocabulary of possession and
+mortality. Each of these words is a thread the following sections pull in turn,
+and their movement, from the ornamental body of the debut to the bare possessives
+of the finale, tracks the same trajectory the density measures describe, now
+legible in content rather than in count.
 
-# Who the songs are singing to {#sec-pronouns}
+# The stance of the songs: who is being addressed {#sec-pronouns}
 
-A song's pronouns quietly set its stance. There is the private, confessional
-**I**, the addressed **you** of a love song or an accusation, and the collective
-**we**. Their mix is one way to hear the shift the video describes, from stepping
-into a persona, to grappling with fame, to a record whose very title, *…and So
-Are We*, folds the listener into the frame.
+A song's pronouns quietly fix its stance. There is the private, confessional *I*;
+the addressed *you* of a love song or an accusation; and the collective *we*.
+Their proportions are one way to hear the movement the video gestures at, from
+stepping into a persona, to grappling with fame, to a record whose very title,
+*…and So Are We*, folds the listener into its frame.
 
 ```{python}
 #| label: fig-pronouns
@@ -391,29 +493,32 @@ F.fig_pronoun_mix(albums)
 plt.show()
 ```
 
-Mitski's world is overwhelmingly first-person-singular. The **I** dominates every
-album, which is what you expect from one of songwriting's great diarists. The
-**we** is the telling one. It is essentially absent on the debut *Lush* (0%), and
-it surfaces most on *Be the Cowboy* and *The Land*, the two records most about a
-self seen from outside.
+Mitski's world is overwhelmingly first-person singular. The *I* dominates every
+album, which is what one expects of one of songwriting's great diarists, and its
+constancy is unremarkable. The *we* is the telling term. It is essentially
+absent on the debut *Lush* (0%) and surfaces most on *Be the Cowboy* and *The
+Land*, the two records most concerned with a self observed from outside.
 
-You can hear the difference in what the "we" is doing. On *Be the Cowboy* it is
-the "we" of a marriage held together by will, sung deadpan on *Me and My
-Husband*:
+The grammatical count, however, understates the difference in what the "we" is
+doing, and here the numbers hand off to close reading. On *Be the Cowboy* the
+collective is the "we" of a marriage held together by will, sung deadpan on
+*Me and My Husband*:
 
 > *But me and my husband, we are doing better / We're sticking together*
 
-That "we" is a performance, a furrowed brow bet on staying. On *The Land* the
+That "we" is a performance, a furrowed-brow wager on staying. On *The Land* the
 collective voice opens outward instead. *Heaven* sings "all of our love / filling
-all of our room", and the album's closer stretches the "we" until it includes the
-whole inhospitable world of the title. The collective voice shows up exactly
-where the camera pulls back.
+all of our room," and the album's closer stretches the "we" until it takes in the
+whole inhospitable world of the title. The plural rises, in short, precisely on
+the records where the camera pulls back, so that a grammatical statistic and a
+thematic reading converge on the same two albums.
 
 # The recurring images {#sec-motifs}
 
-Past counting words, we can trace *what* Mitski keeps returning to. Six
-hand-curated image lexicons, body, water, fire and light, home, death, and
-animals, scored as a rate per 1,000 words, give a fingerprint for each album.
+Beyond counting words, the analysis can trace *what* Mitski returns to. Six
+hand-curated image lexicons (body, water, fire and light, home, death, and
+animals), scored as a rate per thousand words, give each album a thematic
+fingerprint.
 
 ```{python}
 #| label: fig-motifs
@@ -422,36 +527,40 @@ F.fig_motif_heatmap(albums)
 plt.show()
 ```
 
-Three things stand out, and each one is a real line, not just a tally.
+Three features stand out, and each corresponds to an actual line rather than to a
+bare tally.
 
-**The body** is Mitski's most persistent instrument, and it peaks on *Bury Me at
-Makeout Creek*. This is the album where skin and breath and hair carry the
-feeling. *I Will* is nothing but tender physical care:
+The body is Mitski's most persistent instrument, and it peaks on *Bury Me at
+Makeout Creek*, the album where skin and breath and hair carry the feeling.
+*I Will* is tender physical care and nothing else:
 
 > *I will wash your hair at night and dry it off with care*
 
-**Domestic imagery**, the house and the room and the husband, is densest on
-*Retired from Sad* and returns on *Be the Cowboy* and *Laurel Hell*, the records
-preoccupied with marriage, roles, and the trap of a settled life. On *Retired*
-the whole of *Class of 2013* is one exhausted address to a childhood home:
+Domestic imagery, the house, the room, and the husband, is densest on *Retired
+from Sad* and recurs on *Be the Cowboy* and *Laurel Hell*, the records
+preoccupied with marriage, roles, and the confinement of a settled life. On
+*Retired* the whole of *Class of 2013* is one exhausted address to a childhood
+home:
 
 > *Mom, I'm tired / Can I sleep in your house tonight?*
 
-**Death** imagery is low for most of her career and then spikes hardest on *The
-Land Is Inhospitable and So Are We*, the album that, as the title promises, turns
-to mortality and the ground we are buried in. *My Love Mine All Mine* states it
-without flinching:
+Death imagery is low for most of the career and then spikes hardest on
+*The Land Is Inhospitable and So Are We*, the album that, as its title promises,
+turns to mortality and the ground we are buried in. *My Love Mine All Mine*
+states it without flinching:
 
 > *So when I die, which I must do*
 
-The words got fewer. The subjects got heavier.
+The words grew fewer; the subjects grew heavier. That the imagery darkens as the
+volume falls is not incidental to the distillation reading but central to it: the
+concentration of language accompanies a concentration of stakes.
 
 # Does the mood match the words? {#sec-valence}
 
-If the subjects are getting heavier, you might expect the words themselves to
-turn darker. We can test that directly. Using the AFINN valence lexicon, which
-rates thousands of English words from strongly negative to strongly positive, we
-scored the average word sentiment of each album.
+If the subjects are darkening, one might expect the words themselves to darken in
+step. This is directly testable. Using the AFINN valence lexicon, which rates
+thousands of English words from strongly negative to strongly positive, I scored
+the mean word-level sentiment of each album.[^afinn]
 
 ```{python}
 #| label: fig-valence
@@ -461,68 +570,80 @@ plt.show()
 ```
 
 The honest result is that word-level sentiment barely tracks the mood of the
-records, and that is itself worth saying out loud. The most negative album by raw
-vocabulary is *Puberty 2* (mean valence
-`{python} round(valence_of("Puberty"), 2)`), which fits. But *The Land*, the
-record most openly about death, scores *positive*
-(`{python} round(valence_of("The Land"), 2)`), right alongside the far sunnier
-early albums.
+records, and the failure is more instructive than a confirmation would have been.
+The most negative album by raw vocabulary is *Puberty 2* (mean valence
+`{python} round(valence_of("Puberty"), 2)`), which is unsurprising. But *The
+Land*, the record most openly about death, scores *positive*
+(`{python} round(valence_of("The Land"), 2)`), alongside the far sunnier early
+albums, in direct contradiction of what its subject matter would lead one to
+predict.
 
-That is not a bug in the method. It is Mitski's method. She writes her darkest
-material in plain, even bright words, and lets the meaning do the damage.
-"So when I die, which I must do" contains no word AFINN flags as negative. Neither
-does "my love is mine, all mine", a line of pure possession sung over a dying
-moon. A dictionary that scores words one at a time cannot see irony, context, or a
-sweet melody wrapped around a hard truth. The lesson is a caution for the whole
-report: aggregate counts are a good map, but they are not the territory, and the
-places where they fail are often where the writing is best.
+This is not a defect in the measurement so much as an encounter with Mitski's
+method. She writes her darkest material in plain, even bright words and lets the
+meaning do the damage. "So when I die, which I must do" contains no term AFINN
+flags as negative; neither does "my love is mine, all mine," a line of pure
+possession sung over a dying moon. A dictionary that scores words one at a time
+cannot register irony, context, or a sweet melody wrapped around a hard truth,
+and the divergence between lexical sentiment and felt meaning is exactly the
+signature of a writer who has learned to load ordinary language. The null result,
+read this way, is evidence for the distillation thesis rather than against it:
+the semantic weight has migrated off the individual word and into the arrangement
+of words, which is where a per-word dictionary cannot follow. The broader caution
+generalizes to the whole report: aggregate counts are a serviceable map, but they
+are not the territory, and the places where they fail are frequently the places
+where the writing is best.
 
 # Song spotlights: one track per album {#sec-spotlights}
 
-Numbers describe a discography from above. To keep them honest, here is one
-anchor song per album, chosen to sit close to that album's numbers, read for what
-the words are actually doing.
+Numbers describe a discography from above; to keep them honest they must be
+checked against the songs themselves. What follows is one anchor track per
+album, each chosen to sit close to its album's numbers and read for what the
+words are actually doing.
 
-**Lush (2012), *Liquid Smooth*.** The wordy, self-mythologizing debut in
-miniature. The body is a specimen to be looked at: "feel my skin is plump and
-full of life, I'm in my prime". It is dense, ripe, and a little airless, exactly
-like the album's 60 words a minute.
+*Lush* (2012), *Liquid Smooth*. The wordy, self-mythologizing debut in
+miniature, in which the body is a specimen to be looked at: "feel my skin is
+plump and full of life, I'm in my prime." It is dense, ripe, and faintly
+airless, of a piece with the album's sixty words a minute.
 
-**Retired from Sad (2013), *Class of 2013*.** The densest album's sparest song,
-and proof she could already do a lot with a little. Ninety-four words, every one
-of them aimed at a mother: "Mom, would you wash my back? / This once, and then we
-can forget." The tenderness and the shame arrive in the same breath.
+*Retired from Sad* (2013), *Class of 2013*. The densest album's sparest song,
+and proof that Mitski could already do a great deal with a little. Ninety-four
+words, each aimed at a mother: "Mom, would you wash my back? / This once, and
+then we can forget." The tenderness and the shame arrive in a single breath.
 
-**Bury Me at Makeout Creek (2014), *First Love / Late Spring*.** The pivot
-record, sparse and unusually varied. "So please, hurry, leave me, I can't
-breathe" is the whole album's contradiction in one line: begging someone to go and
-to stay at once. The body (breath, the racing chest) does the arguing.
+*Bury Me at Makeout Creek* (2014), *First Love / Late Spring*. The pivot record,
+sparse and unusually varied. "So please, hurry, leave me, I can't breathe" is the
+album's whole contradiction in one line, begging someone to leave and to stay at
+once, with the body, the breath and the racing chest, doing the arguing.
 
-**Puberty 2 (2016), *Your Best American Girl*.** The album of raw nerve, and its
+*Puberty 2* (2016), *Your Best American Girl*. The album of raw nerve, and its
 most quoted song. "You're an all-American boy / I guess I couldn't help trying to
-be your best American girl" turns a love song into a quiet reckoning with who gets
-to belong. Its distinctive words, cry and glory and alone, are all here.
+be your best American girl" turns a love song into a quiet reckoning with who is
+permitted to belong; its distinctive words (cry, glory, and alone) are all
+present.
 
-**Be the Cowboy (2018), *Nobody*.** A disco-bright song about total isolation,
-and the clearest case of Mitski's counterpoint. The word "nobody" is repeated
-into oblivion while she asks for "one good honest kiss". The persona is loud; the
-person underneath is alone.
+*Be the Cowboy* (2018), *Nobody*. A disco-bright song about total isolation, and
+the clearest instance of Mitski's counterpoint. The word "nobody" is repeated
+toward oblivion while she asks for "one good honest kiss": the persona is loud,
+the person beneath it alone.
 
-**Laurel Hell (2022), *Working for the Knife*.** The mature compression at full
-strength. The refrain barely changes, but one verb turns the screw each time:
-"working for the knife", then "living for the knife", then "dying for the knife".
-Almost no new vocabulary, and a whole life of disillusionment.
+*Laurel Hell* (2022), *Working for the Knife*. The mature distillation at full
+strength. The refrain scarcely changes, yet a single verb turns the screw each
+time: "working for the knife," then "living for the knife," then "dying for the
+knife," so that almost no new vocabulary carries an entire life of
+disillusionment.
 
-**The Land (2023), *My Love Mine All Mine*.** Her sparsest album's biggest song,
-and the report's thesis made audible. A hundred and fifty words, a dying moon, and
-one possessive claim held to the light: "Nothing in the world belongs to me / But
-my love, mine, all mine." She is saying almost nothing, and it lands like a will.
+*The Land* (2023), *My Love Mine All Mine*. Her sparsest album's largest song,
+and the report's thesis made audible. A hundred and fifty words, a dying moon,
+and one possessive claim held to the light: "Nothing in the world belongs to me /
+But my love, mine, all mine." She is saying almost nothing, and it lands with the
+finality of a will.
 
-# The visual story: pulling the camera back {#sec-visual}
+# The visual argument: pulling the camera back {#sec-visual}
 
-The video's most striking argument is not about words at all. It is that Mitski's
-album covers, across her mature run, form a single evolving image, and that each
-step pulls the camera back and changes the meaning of what came before.
+The video's most striking claim is not about words at all. It is that Mitski's
+album covers, across her mature run, compose a single evolving image, and that
+each successive frame pulls the camera back and revises the meaning of what came
+before.
 
 ```{python}
 #| label: fig-trilogy
@@ -531,56 +652,76 @@ F.fig_trilogy(albums)
 plt.show()
 ```
 
-- **Be the Cowboy (2018)** opens on an explosion of red, an image that demands
-  attention. It matches an album about stepping into a persona bigger, louder,
-  and more confident than the person underneath.
-- **Laurel Hell (2022)** looks like the same frame drenched in black instead of
-  white. This time it is not a persona. It is Mitski herself grappling with fame,
+- *Be the Cowboy* (2018) opens on an explosion of red, an image that demands
+  attention, matched to an album about stepping into a persona louder and more
+  confident than the person underneath.
+- *Laurel Hell* (2022) presents what reads as the same frame drenched in black
+  rather than white, no longer a persona but Mitski herself grappling with fame,
   the white turned to black.
-- **The Land Is Inhospitable and So Are We (2023)** appears to be the same scene
-  from further away. The camera pulls back to ask what world produced the feelings
-  of *Laurel Hell*.
+- *The Land Is Inhospitable and So Are We* (2023) appears to be the same scene
+  from further away, the camera drawn back to ask what world produced the
+  feelings of *Laurel Hell*.
 
-Read together, the covers do in images what the lyrics do in words. They say less
-on the surface and imply more underneath. One boundary is worth being plain
-about. This report quantifies the seven studio albums for which lyrics are
-available. The newest release the video discusses, whose meaning it argues
-changes depending on whether you see the zoomed-in streaming cover or the
-zoomed-out vinyl, is not part of this lyric dataset. It appears here as narrative,
-not as a data point. If its lyrics enter the corpus later, the metadata file and
-every figure on this page update on their own.
+Read together, the covers do in images what the lyrics do in words: they present
+less on the surface and imply more beneath it, which is the visual analogue of
+that distillation. One boundary deserves to be stated plainly. This report
+quantifies the seven studio albums for which lyrics are available; the newest
+release the video discusses, whose meaning it argues shifts depending on whether
+one sees the zoomed-in streaming cover or the zoomed-out vinyl, is not part of
+this lyric dataset. It appears here as narrative, not as a data point. Should its
+lyrics enter the corpus later, the metadata file and every figure on this page
+update of their own accord.
 
-# Synthesis {#sec-synthesis}
+# Discussion {#sec-synthesis}
 
-Put the pieces together and the video's thesis resolves into something the data
-supports:
+Assembled, the findings resolve the popular claim into something more precise and,
+I think, more interesting than the claim itself.
 
-- Mitski's lyrics have grown **less dense** over her career
-  (`{python} ci("release_year", "words_per_minute")` against time), and the
-  **songs themselves are shorter**.
-- The words that remain are **less repetitive and more varied**, most sharply in
-  her mature era (density against repetition,
+- Mitski's lyrics have grown less dense across her career
+  (`{python} ci("release_year", "words_per_minute")` against time), and the songs
+  themselves are shorter, so the reduction is located in the writing rather than
+  in the arrangement.
+- The words that remain are less repetitive and more varied, most sharply in the
+  mature era (density against repetition,
   `{python} ci("words_per_minute", "repetition_index", mature)`), with *The Land*
-  the extreme case on both axes.
-- The vocabulary each album is built from moves with her subject matter, from the
-  underwater self-image of *Lush* to the possession and mortality of *The Land*.
-- The **collective "we"** and the imagery of **death** both rise on exactly the
-  late records where she is writing least and pulling the camera furthest back.
-- Word-level **sentiment** does not follow, and that gap is a feature of her
-  writing: she keeps the darkest meaning in the plainest words.
+  the extreme case on both axes and the same inverse pattern recurring in refrain
+  and rhyme.
+- The distinctive vocabulary of each album moves with its subject matter, from
+  the underwater self-image of *Lush* to the possession and mortality of
+  *The Land*.
+- The collective "we" and the imagery of death both rise on exactly the late
+  records where Mitski writes least and pulls the camera furthest back.
+- Word-level sentiment declines to follow, and that gap is not a failure of the
+  corpus but a property of the writing: she keeps the darkest meaning in the
+  plainest words.
+
+Returning to the frame set out at the start, the evidence favours distillation
+over attrition. Every prediction the attrition reading makes, that fewer words
+should mean more repetition, a narrowing vocabulary, a writer working a shrinking
+bank, is contradicted by the data, while the predictions of the distillation
+reading are borne out: volume and variety move in opposition, distinct vocabulary
+keeps arriving through the sparsest records, and the semantic load visibly
+migrates from the word to the arrangement, beyond the reach of a per-word
+dictionary. I do not claim this settles the matter as an inferential fact about
+songwriting in general; seven albums cannot bear that weight, and the mature-era
+coupling that carries much of the argument is estimated on four records. I claim
+the narrower and defensible thing: that within this discography, "saying less" is
+not the depletion it is sometimes taken for but the discipline through which
+Mitski says more, and that the single number the video stops at is the beginning
+of the argument rather than its conclusion.
 
 She is, verifiably, saying less. And she is, just as verifiably, using what she
 says to carry more.
 
-# Explore it in three dimensions {#sec-3d}
+# The discography in three dimensions {#sec-3d}
 
-The findings above each isolate one relationship at a time, on a flat page. But
-the story is really about several axes moving together — density, diversity,
-repetition, imagery, address — so the last word is three-dimensional. Each figure
-below is a pure-Python (matplotlib) 3D render, composed from an angle chosen to
-read clearly. Because a single camera angle can hide depth, `scripts/make_3d.py`
-also writes a 360-degree **rotation** of each chart to `figures/3d/*.gif`; run it
-to spin these on your own screen.
+The findings above each isolate one relationship at a time on a flat page. The
+story, however, is really about several axes moving together (density, variety,
+repetition, imagery, address), so the closing figures are three-dimensional. Each
+is a pure-Python (matplotlib) render, composed from an angle chosen to read
+clearly. Because a single camera angle can conceal depth, `scripts/make_3d.py`
+also writes a 360-degree rotation of each chart to `figures/3d/*.gif`; run it to
+turn these on your own screen.
 
 ```{python}
 #| label: setup-3d
@@ -588,11 +729,11 @@ to spin these on your own screen.
 from mitski_analysis import figures3d as F3
 ```
 
-The whole discography as a single **path through "lyric space"** — each album
-placed by how dense it is (words per minute), how wide its vocabulary is
-(MATTR), and how much it repeats itself, with the path coloured light-to-dark
-from her first record to her latest. The early era wanders; the mature era bends
-into the tight density–repetition track the scatter above only hints at.
+The whole discography renders as a single path through "lyric space," each album
+placed by how dense it is (words per minute), how wide its vocabulary is (MATTR),
+and how much it repeats itself, with the path coloured light to dark from her
+first record to her latest. The early era wanders; the mature era bends into the
+tight density-repetition track the flat scatter above only hints at.
 
 ```{python}
 #| label: fig3d-trajectory
@@ -601,9 +742,9 @@ F3.fig3d_trajectory(albums)
 plt.show()
 ```
 
-The **recurring imagery as terrain**: the same rates as the heatmap, but with
-height standing in for frequency, so the *death* and *water* ridges that rise on
-the late, sparse albums read as landscape.
+The recurring imagery renders as terrain, taking the same rates as the heatmap
+but letting height stand in for frequency, so that the *death* and *water* ridges
+rising on the late, sparse albums read as landscape.
 
 ```{python}
 #| label: fig3d-terrain
@@ -612,9 +753,9 @@ F3.fig3d_motif_terrain(albums)
 plt.show()
 ```
 
-Every **individual song** in three dimensions — words, lexical diversity, and
-mean word length — coloured by album. Click an album in the legend to isolate it
-and watch how tightly (or loosely) each record's songs cluster.
+Every individual song appears in three dimensions (words, lexical diversity, and
+mean word length), coloured by album. Isolating an album in the legend shows how
+tightly, or loosely, each record's songs cluster.
 
 ```{python}
 #| label: fig3d-cloud
@@ -623,9 +764,9 @@ F3.fig3d_song_cloud(songs, albums)
 plt.show()
 ```
 
-Finally, **who the songs address**, as a path over time through the shares of
-the private *I*, the *you*, and the collective *we* — the last of which climbs
-on exactly the late records where she pulls the camera back.
+Finally, who the songs address traces as a path over time through the shares of
+the private *I*, the *you*, and the collective *we*, the last of which climbs on
+exactly the late records where the camera pulls back.
 
 ```{python}
 #| label: fig3d-pronouns
@@ -636,28 +777,30 @@ plt.show()
 
 # Limitations {#sec-limits}
 
-- **Durations are album totals**, taken from streaming and database aggregators
-  and rounded to the reported figure. The words-per-minute trend is robust to
+- Durations are album totals, taken from streaming and database aggregators and
+  rounded to the reported figure. The words-per-minute trend is robust to
   second-level error, because the word counts are exact and the albums are close
   in length, but per-song words per minute is deliberately *not* computed here,
-  since reliable per-track durations were not available.
-- **Lyrics are a Genius transcription.** Ad-libs, repeats written as "(x2)", and
+  since reliable per-track durations were unavailable.
+- The lyrics are a Genius transcription. Ad-libs, repeats written as "(x2)," and
   transcription choices all affect the raw counts. Most section tags and scraper
   noise are removed, but a few structural tags survive in the text; the
   distinctive-word analysis drops them with a stopword list rather than
-  re-cleaning the corpus, so the headline counts stay comparable to earlier runs.
-- **Motif and pronoun lexicons are hand-curated and conservative.** They are a
-  transparent lens, listed in full in `text.py`, not an exhaustive semantic model.
-  The valence lexicon (AFINN) is likewise a word-by-word dictionary, and, as the
-  sentiment section shows, it cannot read context or irony.
-- **Lyrics are quoted briefly, for commentary and criticism.** Excerpts are held
-  to a line or two per point and are always tied to analysis.
-- **Seven albums is a small n.** The correlations describe this discography; they
-  are not inferential claims about songwriting in general. The early self-released
-  records behave differently from the mature run and are flagged as such wherever
-  it matters.
+  re-cleaning the corpus, so that the headline counts remain comparable across
+  runs.
+- The motif and pronoun lexicons are hand-curated and conservative. They are a
+  transparent lens, listed in full in `text.py`, not an exhaustive semantic
+  model. The valence lexicon (AFINN) is likewise a word-by-word dictionary and,
+  as the sentiment section demonstrates, cannot read context or irony.
+- Lyrics are quoted briefly, for commentary and criticism. Excerpts are held to a
+  line or two per point and are always tied to analysis.
+- Seven albums is a small sample. The correlations describe this discography;
+  they are not inferential claims about songwriting in general, and the
+  mature-era relationship that carries much of the argument rests on four
+  records. The early self-released albums behave differently from the mature run
+  and are flagged as such wherever it bears on a claim.
 
-# Reproduce this report {#sec-repro}
+# Reproducibility {#sec-repro}
 
 ```bash
 pip install -e .                         # pandas, numpy, matplotlib, pillow (pure Python)
@@ -669,7 +812,34 @@ quarto render report/mitski_lyrics_over_time.qmd   # this document (needs the Qu
 ```
 
 Every figure and every number above is generated from the committed data files by
-the code in `src/mitski_analysis/`. Change the metadata, and the report follows.
+the code in `src/mitski_analysis/`. Alter the metadata, and the report follows.
+
+# Works Cited {#sec-refs}
+
+Carnegie Mellon University. *The CMU Pronouncing Dictionary.* Pittsburgh:
+Carnegie Mellon University.
+
+Covington, Michael A., and Joe D. McFall. "Cutting the Gordian Knot: The
+Moving-Average Type–Token Ratio (MATTR)." *Journal of Quantitative Linguistics*
+17, no. 2 (2010): 94–100.
+
+Efron, Bradley, and Robert J. Tibshirani. *An Introduction to the Bootstrap.*
+New York: Chapman & Hall, 1993.
+
+Guiraud, Pierre. *Les caractères statistiques du vocabulaire.* Paris: Presses
+Universitaires de France, 1954.
+
+Monroe, Burt L., Michael P. Colaresi, and Kevin M. Quinn. "Fightin' Words:
+Lexical Feature Selection and Evaluation for Identifying the Content of Political
+Conflict." *Political Analysis* 16, no. 4 (2008): 372–403.
+
+Nielsen, Finn Årup. "A New ANEW: Evaluation of a Word List for Sentiment
+Analysis in Microblogs." In *Proceedings of the ESWC2011 Workshop on 'Making
+Sense of Microposts',* 93–98. 2011.
+
+Tweedie, Fiona J., and R. Harald Baayen. "How Variable May a Constant Be?
+Measures of Lexical Richness in Perspective." *Computers and the Humanities* 32
+(1998): 323–352.
 
 ## Appendix: full album table
 
@@ -696,3 +866,33 @@ a few seconds, the most commonly reported total was used. Word-level sentiment
 uses the AFINN valence lexicon (Finn Årup Nielsen, 2011), bundled under
 `data/lexicons/valence_afinn.txt` and released under the Open Database License.
 :::
+
+[^ttr]: The raw type-token ratio falls mechanically as a text lengthens, since
+    high-frequency words necessarily recur; on the length-dependence of lexical
+    richness measures see Fiona J. Tweedie and R. Harald Baayen, "How Variable
+    May a Constant Be? Measures of Lexical Richness in Perspective," *Computers
+    and the Humanities* 32 (1998): 323–352.
+
+[^mattr]: Michael A. Covington and Joe D. McFall, "Cutting the Gordian Knot: The
+    Moving-Average Type–Token Ratio (MATTR)," *Journal of Quantitative
+    Linguistics* 17, no. 2 (2010): 94–100.
+
+[^guiraud]: Pierre Guiraud, *Les caractères statistiques du vocabulaire* (Paris:
+    Presses Universitaires de France, 1954).
+
+[^boot]: The intervals reported throughout are percentile bootstrap intervals;
+    on the interpretation of the bootstrap for small samples see Bradley Efron
+    and Robert J. Tibshirani, *An Introduction to the Bootstrap* (New York:
+    Chapman & Hall, 1993).
+
+[^cmu]: Carnegie Mellon University, *The CMU Pronouncing Dictionary* (CMUdict), a
+    public-domain machine-readable pronunciation dictionary of North American
+    English.
+
+[^fightin]: Burt L. Monroe, Michael P. Colaresi, and Kevin M. Quinn, "Fightin'
+    Words: Lexical Feature Selection and Evaluation for Identifying the Content of
+    Political Conflict," *Political Analysis* 16, no. 4 (2008): 372–403.
+
+[^afinn]: Finn Årup Nielsen, "A New ANEW: Evaluation of a Word List for Sentiment
+    Analysis in Microblogs," in *Proceedings of the ESWC2011 Workshop on 'Making
+    Sense of Microposts'* (2011), 93–98.
