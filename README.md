@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/sj-jain-systems/evolution-of-mitski/actions/workflows/ci.yml/badge.svg)](https://github.com/sj-jain-systems/evolution-of-mitski/actions/workflows/ci.yml)
 
+This project was based on a short video essay about the themes of Mitski over time and how she seems to be more deleberate with her words. 
+
 A data-driven reading of Mitski's discography. The project takes a claim from a
 short video essay, *"she is literally saying less over time… but it's not that
 simple"*, and tests it against the lyrics of all seven studio albums, then keeps
