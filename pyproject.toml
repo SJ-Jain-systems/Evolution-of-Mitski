@@ -19,6 +19,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
+    "pytest-cov>=4.0",
     "ruff>=0.5",
 ]
 
@@ -41,6 +42,17 @@ where = ["src"]
 # So `pytest` finds the package without the per-file sys.path shim.
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+# Coverage is a reported signal, not a gate: `pytest --cov` (CI passes it
+# explicitly) measures the package below without failing the build on a number.
+# A bare `pytest` still runs with no coverage, so pytest-cov is only needed for
+# the dev extra.
+[tool.coverage.run]
+source = ["mitski_analysis"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
 
 [tool.ruff]
 line-length = 100

@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
         run: ruff format --check .
 
       - name: Tests
-        run: python -m pytest -q
+        run: python -m pytest -q --cov --cov-report=term-missing --cov-report=xml
 
       # Prove the whole pipeline builds headlessly (no Quarto CLI in CI). The 3D
       # step skips the slow rotation GIFs; PNG rendering is enough to catch
