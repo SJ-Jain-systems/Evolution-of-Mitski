@@ -70,8 +70,9 @@ def kendall_tau(x, y) -> float:
 
 
 # ---------------------------------------------------- exact / MC permutation
-def permutation_p(x, y, stat=pearson_r, n_perm: int = 20000, seed: int = 0,
-                  exact_max_n: int = 9) -> float:
+def permutation_p(
+    x, y, stat=pearson_r, n_perm: int = 20000, seed: int = 0, exact_max_n: int = 9
+) -> float:
     """Two-sided permutation p-value for ``stat(x, y)``.
 
     Exact (all n! orderings) when n <= ``exact_max_n``; otherwise Monte Carlo
@@ -256,9 +257,11 @@ class CorrelationReport:
     extras: dict = field(default_factory=dict)
 
     def __str__(self) -> str:
-        return (f"r = {self.r:.2f} (Fisher 95% CI {self.fisher_lo:.2f} to {self.fisher_hi:.2f}), "
-                f"exact permutation p = {self.p_perm:.3f}; Spearman rho = {self.spearman:.2f}; "
-                f"leave-one-out r in [{self.loo_min:.2f}, {self.loo_max:.2f}]")
+        return (
+            f"r = {self.r:.2f} (Fisher 95% CI {self.fisher_lo:.2f} to {self.fisher_hi:.2f}), "
+            f"exact permutation p = {self.p_perm:.3f}; Spearman rho = {self.spearman:.2f}; "
+            f"leave-one-out r in [{self.loo_min:.2f}, {self.loo_max:.2f}]"
+        )
 
 
 def correlation_report(x, y, labels=None, seed: int = 0) -> CorrelationReport:
@@ -269,11 +272,18 @@ def correlation_report(x, y, labels=None, seed: int = 0) -> CorrelationReport:
     loo = leave_one_out(x, y, labels)
     s, sl, sh = theil_sen(x, y, seed=seed)
     return CorrelationReport(
-        n=x.size, r=r, fisher_lo=lo, fisher_hi=hi,
+        n=x.size,
+        r=r,
+        fisher_lo=lo,
+        fisher_hi=hi,
         p_perm=permutation_p(x, y, pearson_r, seed=seed),
         spearman=spearman_rho(x, y),
         p_spearman=permutation_p(x, y, spearman_rho, seed=seed),
         kendall=kendall_tau(x, y),
-        loo_min=loo.min, loo_max=loo.max, loo_sign_stable=loo.sign_stable,
-        slope=s, slope_lo=sl, slope_hi=sh,
+        loo_min=loo.min,
+        loo_max=loo.max,
+        loo_sign_stable=loo.sign_stable,
+        slope=s,
+        slope_lo=sl,
+        slope_hi=sh,
     )
